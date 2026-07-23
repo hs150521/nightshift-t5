@@ -263,10 +263,10 @@ int uart_handler_init(void)
 {
     if (g_initialised) return 0;
 
-    /* ---- Pinmux for UART2 ---- */
-    if (NIGHTSHIFT_UART_PORT == TUYA_UART_NUM_2) {
-        tkl_io_pinmux_config(TUYA_IO_PIN_40, TUYA_UART2_RX);
-        tkl_io_pinmux_config(TUYA_IO_PIN_41, TUYA_UART2_TX);
+    /* ---- Pinmux for UART1 (P11 header: P00=TX, P01=RX) ---- */
+    if (NIGHTSHIFT_UART_PORT == TUYA_UART_NUM_1) {
+        tkl_io_pinmux_config(TUYA_IO_PIN_0, TUYA_UART1_TX);
+        tkl_io_pinmux_config(TUYA_IO_PIN_1, TUYA_UART1_RX);
     }
 
     /* ---- UART peripheral init ---- */

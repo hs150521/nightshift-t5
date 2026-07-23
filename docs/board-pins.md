@@ -4,12 +4,14 @@ Board: **Tuya TUYA_T5AI_BOARD** with **T5AI-BOARD-LCD** (3.5″ 480×320)
 
 ---
 
-## UART2 — Host Communication (460 800 baud, 8-N-1)
+## UART1 — Host Communication (460 800 baud, 8-N-1)
 
-| Signal | GPIO Pin | Direction |
-|--------|----------|-----------|
-| TX     | PIN 41   | T5 → OPi  |
-| RX     | PIN 40   | OPi → T5  |
+P11 header:
+
+| Signal | GPIO Pin | Header Pin | Direction |
+|--------|----------|------------|----------|
+| TX     | PIN 0 (P00) | P11 Pin 10 | T5 → OPi  |
+| RX     | PIN 1 (P01) | P11 Pin 18 | OPi → T5  |
 
 ---
 
@@ -73,8 +75,8 @@ Display parameters (from `tuya_t5ai_ex_module.h`):
 
 | Function | Pin | Active |
 |----------|-----|--------|
-| UART2 TX | 41  | —      |
-| UART2 RX | 40  | —      |
+| UART1 TX | 0 (P00) | —      |
+| UART1 RX | 1 (P01) | —      |
 | LCD SPI CLK | 49 | —   |
 | LCD SPI CS  | 48 | LOW  |
 | LCD SPI SDA | 50 | —   |

@@ -11,7 +11,7 @@
 #include "t5_protocol.h"
 
 /**
- * @brief Initialise UART2 at 460800 8N1 and spawn the RX task.
+ * @brief Initialise UART1 at 460800 8N1 and spawn the RX task.
  * @return 0 on success, negative on error.
  */
 int uart_handler_init(void);
