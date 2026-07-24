@@ -22,5 +22,5 @@ menu "configure project"
         default "arduino" if PROJECT_FRAMEWORK_ARDUINO
 endmenu
 
-source "c:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/boards/Kconfig"
-source "c:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/src/Kconfig"
+source "C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/boards/Kconfig"
+source "C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/src/Kconfig"
