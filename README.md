@@ -26,8 +26,9 @@ Communication uses **T5-Link v1** — a lightweight binary protocol over UART
 | GND | GND | Common ground |
 
 > Only three wires are needed. No flow-control lines required.
-> DIP switch: **P10=OFF** (mandatory — P10=ON bridges the CH342 USB TX onto
-> GPIO10 and fights the OPi TX), P11=ON (lets COM7 monitor T5 output), P0/P1=OFF.
+> DIP switch for normal OPi communication: **P0=OFF, P1=OFF, P10=OFF,
+> P11=ON**. P10 must remain off while OPi TX is connected. Detect the CH342
+> interface with `scan_ports.py`; do not persist a machine-specific COM number.
 
 ---
 
@@ -41,35 +42,50 @@ Communication uses **T5-Link v1** — a lightweight binary protocol over UART
 | Max payload | 1 024 bytes |
 | Heartbeat | 2 s interval, 6 s timeout |
 
-See `Nightshift_OPi5B_T5_联合开发文档_v1.md` for the full command reference.
+See [docs/t5-link-v1.md](docs/t5-link-v1.md) for the frozen layouts and
+the deliberate compatibility decisions against the Orange Pi golden vectors.
 
 ---
 
 ## Build
 
-The project is built with the TuyaOpen SDK using `tos.py`:
+The verified SDK baseline is TuyaOpen `v1.9.0-1-g806690f0`, commit
+`806690f015f91995bd4c7bb49e76d8010a6db484`.
 
-```bash
-# From the TuyaOpen SDK root
-python tos.py build --board TUYA_T5AI_BOARD --app /path/to/nightshift-t5
+```powershell
+$env:Path=(Resolve-Path '../TuyaOpen/.venv/Scripts').Path + ';' + $env:Path
+& ../TuyaOpen/.venv/Scripts/python.exe ../TuyaOpen/tos.py build
 ```
 
-The default board configuration (`app_default.config`) enables the 3.5″ LCD
-with LVGL v9 and UART support.
+Run that command from this repository. Full build, flash, port-detection, and
+troubleshooting instructions are in [docs/build-flash.md](docs/build-flash.md).
 
 ---
 
-## Phase 1 Features (MVP)
+## Implemented panel behavior
 
-- **Three-mode display**
-  - 待命 (IDLE) — warm orange background
-  - 工作中 (DAY_WORK) — cool blue-white background
-  - 夜间执行 (NIGHT_EXEC) — deep blue background
-- **Offline overlay** — semi-transparent "主机离线" when heartbeat is lost
-- **Progress bar** — live XX.X% during RUNNING work-state
-- **Attention alerts** — "待确认: N项" prompt when confirmations are pending
-- **LED feedback** — on/off/blink patterns per mode; fast blink on attention
-- **Heartbeat watchdog** — 6 s timeout triggers offline state automatically
+- Atomic `STATE_SYNC_BEGIN` / `STATE_SYNC_END` staging with coherent commit.
+- Revision guards and 32-entry duplicate request replay.
+- Mode, work state, progress, dashboard, attention, notices, and task list.
+- Confirm, reject, retry, pause, resume, dismiss, open-task, and page events.
+- Full-screen host-offline overlay and disabled side-effect controls after 6 s.
+- Binary-only protocol UART0; SDK diagnostics stay on UART1/mailbox.
+- Backlight control through the Tuya display driver.
+- No Wi-Fi or MQTT communication in the T5 application.
+
+The on-board LED is intentionally not advertised in the current build because
+the verified SDK board override disables it to preserve UART0 P10/P11.
+
+## Tests
+
+```powershell
+python -m unittest discover -s tests -v
+python tools/sync_golden_vectors.py --check
+```
+
+The suite covers golden frames, malformed COBS, CRC/length/version/flag errors,
+field offsets, heartbeat response size, duplicate replay, revision rejection,
+atomic state/task replacement, UI action encoding, and watchdog recovery.
 
 ---
 
@@ -82,14 +98,18 @@ nightshift-t5/
 ├── include/
 │   └── nightshift_config.h     # Compile-time constants (UART, heartbeat, limits)
 ├── src/
-│   ├── main.c                  # Application entry point & init sequence
-│   ├── t5_protocol.h / .c      # Frame codec (COBS, CRC-16, encode/decode)
-│   ├── uart_handler.h / .c     # UART0 transport & RX task
-│   ├── command_handler.h / .c  # Command dispatcher (routes frames → state)
-│   ├── app_state.h / .c        # Global state mirror with revision guard
-│   └── ui_manager.h / .c       # LVGL UI: mode pages, overlay, LED control
-└── docs/
-    └── board-pins.md           # Pin assignment reference
+│   ├── firmware_main.c         # Application entry and subsystem lifecycle
+│   ├── t5_protocol.*           # COBS, CRC-16, strict frame codec
+│   ├── frame_stream.*          # Delimiter/overflow recovery
+│   ├── request_cache.*         # Duplicate request response replay
+│   ├── command_router.*        # Strict command payload parsers
+│   ├── state_store.*           # Atomic committed/staging state
+│   ├── uart_transport.*        # UART0 RX/TX, events, watchdog
+│   └── panel_ui.*              # LVGL UI and touch controls
+├── contracts/uart/             # Canonical Orange Pi golden vectors
+├── tests/                      # Host protocol/state tests
+├── tools/                      # Host codec and synchronization tooling
+└── docs/                       # Wiring, protocol, build/flash notes
 ```
 
 ---

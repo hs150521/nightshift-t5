@@ -1,73 +1,41 @@
-"""Inject a T5-Link v1 ATTENTION_SET frame into COM7 and print the reply.
+"""Send a valid ATTENTION_SET request to an explicitly selected UART0 port."""
 
-Frame: Magic(2) Ver(1) Flags(1) Seq(2LE) Cmd(2LE) Len(2LE) Payload CRC16(2LE)
-Wire : COBS(raw) + 0x00
-"""
-import serial
+from __future__ import annotations
+
+import argparse
 import struct
-import time
+import sys
+from pathlib import Path
+
+import serial
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+from t5_link import ACK_REQ, Frame, ProtocolError, encode_string
 
 
-def crc16_ccitt_false(data: bytes) -> int:
-    crc = 0xFFFF
-    for b in data:
-        crc ^= b << 8
-        for _ in range(8):
-            crc = ((crc << 1) ^ 0x1021) if (crc & 0x8000) else (crc << 1)
-            crc &= 0xFFFF
-    return crc
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", required=True, help="Verified CH342 UART0 interface")
+    args = parser.parse_args()
+    payload = struct.pack("<IIH", 1, 1, 1) + encode_string("host smoke test")
+    request = Frame(ACK_REQ, 42, 0x1002, payload).encode()
+    print("TX", request.hex(" "))
+    with serial.Serial(args.port, 460800, timeout=1) as stream:
+        stream.reset_input_buffer()
+        stream.write(request)
+        stream.flush()
+        response = stream.read_until(b"\x00")
+    try:
+        frame = Frame.decode(response)
+    except ProtocolError as error:
+        print(f"invalid/no response: {error}; bytes={response.hex()}")
+        return 1
+    print(
+        f"RX seq={frame.sequence} flags=0x{frame.flags:02x} "
+        f"cmd=0x{frame.command:04x} payload={frame.payload.hex()}"
+    )
+    return 0 if frame.sequence == 42 and frame.command == 0x1002 else 1
 
 
-def cobs_encode(src: bytes) -> bytes:
-    out = bytearray()
-    code_idx = 0
-    code = 1
-    out.append(0)  # reserve first code slot
-    for b in src:
-        if b == 0x00:
-            out[code_idx] = code
-            code = 1
-            code_idx = len(out)
-            out.append(0)
-        else:
-            out.append(b)
-            code += 1
-            if code == 0xFF:
-                out[code_idx] = 0xFF
-                code_idx = len(out)
-                out.append(0)
-                code = 1
-    out[code_idx] = code
-    return bytes(out)
-
-
-def build_frame(flags: int, seq: int, cmd: int, payload: bytes) -> bytes:
-    raw = bytes([0x54, 0x35, 0x01, flags])
-    raw += struct.pack('<HHH', seq, cmd, len(payload))
-    raw += payload
-    raw += struct.pack('<H', crc16_ccitt_false(raw))
-    return cobs_encode(raw) + b'\x00'
-
-
-def main():
-    # ATTENTION_SET (0x1002), ACK_REQ, attention = NEED_CONFIRM (u32LE)
-    frame = build_frame(flags=0x01, seq=42, cmd=0x1002,
-                        payload=struct.pack('<I', 0x00000001))
-    print('TX frame:', frame.hex(' '))
-
-    s = serial.Serial('COM7', 460800, timeout=1)
-    s.reset_input_buffer()
-    s.write(frame)
-    s.flush()
-    time.sleep(4)
-    data = s.read(s.in_waiting)
-    s.close()
-
-    print(f'--- {len(data)} bytes received ---')
-    print(data.decode('utf-8', 'replace'))
-    print('--- raw hex ---')
-    print(data.hex(' '))
-
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    raise SystemExit(main())

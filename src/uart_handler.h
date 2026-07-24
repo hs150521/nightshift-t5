@@ -45,8 +45,8 @@ bool uart_is_opi_online(void);
 uint32_t uart_get_last_heartbeat_ms(void);
 
 /**
- * @brief Write a plain-text debug string directly to the protocol UART.
- *        Use this for diagnostics visible on the same COM port as protocol data.
+ * @brief Legacy no-op retained for source compatibility.
+ *        Protocol UART0 never carries plain text.
  */
 void uart_debug_puts(const char *str);
 

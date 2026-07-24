@@ -10,7 +10,18 @@ set(APP_PATH ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(APP_NAME ${APP_PATH} NAME)
 
 # APP_SRC
-aux_source_directory(${APP_PATH}/src APP_SRC)
+# Keep this list explicit so obsolete MVP modules cannot accidentally be
+# linked back into the protocol UART or LVGL callback path.
+set(APP_SRC
+    ${APP_PATH}/src/firmware_main.c
+    ${APP_PATH}/src/t5_protocol.c
+    ${APP_PATH}/src/frame_stream.c
+    ${APP_PATH}/src/request_cache.c
+    ${APP_PATH}/src/state_store.c
+    ${APP_PATH}/src/command_router.c
+    ${APP_PATH}/src/uart_transport.c
+    ${APP_PATH}/src/panel_ui.c
+)
 
 # APP_INC
 set(APP_INC ${APP_PATH}/include ${APP_PATH}/src)

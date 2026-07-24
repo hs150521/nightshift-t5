@@ -64,7 +64,11 @@ uint16_t crc16_ccitt_false(const uint8_t *data, size_t len)
 size_t cobs_encode(const uint8_t *src, size_t len,
                    uint8_t *dst, size_t dst_max)
 {
-    if (len == 0) return 0;
+    if (!dst || dst_max == 0 || (!src && len != 0)) return 0;
+    if (len == 0) {
+        dst[0] = 0x01;
+        return 1;
+    }
 
     size_t out_idx   = 0;
     size_t code_idx  = 0;
@@ -102,7 +106,7 @@ size_t cobs_encode(const uint8_t *src, size_t len,
 size_t cobs_decode(const uint8_t *src, size_t len,
                    uint8_t *dst, size_t dst_max)
 {
-    if (len == 0) return 0;
+    if (!src || !dst || len == 0) return 0;
 
     size_t out_idx = 0;
     size_t i       = 0;
@@ -136,10 +140,14 @@ size_t cobs_decode(const uint8_t *src, size_t len,
 size_t t5_frame_encode(const t5_frame_t *frame,
                        uint8_t *out, size_t out_max)
 {
-    uint8_t raw[12 + 1024];   /* max raw frame */
+    uint8_t raw[NIGHTSHIFT_MAX_RAW_FRAME];
     size_t  raw_len;
 
-    if (!frame || frame->payload_len > 1024) return 0;
+    if (!frame || !out || out_max < 2 ||
+        frame->payload_len > NIGHTSHIFT_MAX_PAYLOAD ||
+        !t5_frame_flags_valid(frame->flags)) {
+        return 0;
+    }
 
     raw_len = (size_t)(10 + frame->payload_len + 2);
     if (raw_len > sizeof(raw)) return 0;
@@ -178,9 +186,10 @@ size_t t5_frame_encode(const t5_frame_t *frame,
 int t5_frame_decode(const uint8_t *cobs_data, size_t len,
                     t5_frame_t *frame)
 {
-    uint8_t raw[12 + 1024];
+    uint8_t raw[NIGHTSHIFT_MAX_RAW_FRAME];
 
     if (!cobs_data || !frame || len == 0) return -1;
+    memset(frame, 0, sizeof(*frame));
 
     /* COBS decode */
     size_t raw_len = cobs_decode(cobs_data, len, raw, sizeof(raw));
@@ -199,13 +208,14 @@ int t5_frame_decode(const uint8_t *cobs_data, size_t len,
     uint16_t payload_len = READ_U16_LE(raw + 8);
 
     /* Sanity check */
-    if ((size_t)(10 + payload_len + 2) != raw_len) return -5;
-    if (payload_len > 1024) return -5;
+    if (!t5_frame_flags_valid(flags)) return -5;
+    if ((size_t)(10 + payload_len + 2) != raw_len) return -6;
+    if (payload_len > NIGHTSHIFT_MAX_PAYLOAD) return -6;
 
     /* Verify CRC over Magic..Payload */
     uint16_t crc_computed = crc16_ccitt_false(raw, 10 + payload_len);
     uint16_t crc_received = READ_U16_LE(raw + 10 + payload_len);
-    if (crc_computed != crc_received) return -6;
+    if (crc_computed != crc_received) return -7;
 
     /* Populate output frame */
     frame->flags       = flags;
@@ -216,4 +226,12 @@ int t5_frame_decode(const uint8_t *cobs_data, size_t len,
         memcpy(frame->payload, raw + 10, payload_len);
     }
     return 0;
+}
+
+int t5_frame_flags_valid(uint8_t flags)
+{
+    if ((flags & (uint8_t)~T5_FLAG_VALID_MASK) != 0) return 0;
+    if ((flags & T5_FLAG_RESPONSE) && (flags & T5_FLAG_EVENT)) return 0;
+    if ((flags & T5_FLAG_RESPONSE) && (flags & T5_FLAG_ACK_REQ)) return 0;
+    return 1;
 }

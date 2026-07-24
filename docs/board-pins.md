@@ -32,20 +32,19 @@ alternate pins GPIO40/41 are occupied by the LCD RGB bus.
 | Scenario | P0 | P1 | P10 | P11 |
 |----------|----|----|-----|-----|
 | Normal OPi comms (recommended) | OFF | OFF | **OFF** | **ON** |
-| Flashing firmware | OFF | OFF | ON | ON |
-| PC-side RX injection test (COM7 → GPIO10) | OFF | OFF | ON | ON |
+| PC-side UART0 injection | OFF | OFF | ON | ON |
 
 - **P10=ON connects CH342 TX to GPIO10** — must be OFF while the OPi TX is
   wired, otherwise the two drivers fight on the RX line.
-- **P11=ON connects CH342 RX to GPIO11** — passive tap; safe to keep ON so
-  COM7 can monitor everything the T5 transmits.
+- **P11=ON connects CH342 RX to GPIO11** — passive tap; safe to keep on.
+  Use USB descriptors and frame sniffing to detect the current COM number.
 
 ### RX path verification (2026-07)
 
-Full stack verified by injecting bytes from the PC via COM7 with P10=ON:
-raw bytes → `[NS] RX n bytes` hex dump → 0x00 delimiter framing → COBS
-decode → CRC-16 check → `cmd=0x1002` dispatch → RESPONSE frame transmitted.
-Use `test_frame.py` to repeat this test.
+Full stack was verified by injecting valid frames from the CH342 UART0
+interface with P10=ON. Production firmware emits only COBS-framed T5-Link
+bytes on UART0. Use `scan_ports.py` and `test_frame.py --port COMx`; never
+assume the historical COM number.
 
 ---
 
@@ -68,8 +67,13 @@ Display parameters (from `tuya_t5ai_ex_module.h`):
 |-----------|-------|
 | Resolution | 320 × 480 |
 | Pixel format | RGB565 |
-| Rotation | 0° |
+| Native driver rotation | 0° (320 × 480 memory geometry) |
+| Nightshift LVGL rotation | 90° (480 × 320 landscape) |
 | Driver IC | ILI9488 |
+
+Nightshift applies `LV_DISPLAY_ROTATION_90` before creating the UI. LVGL
+rotates both display flush areas and GT1151 pointer coordinates, so visual and
+touch orientation remain consistent.
 
 ---
 
@@ -91,8 +95,8 @@ Display parameters (from `tuya_t5ai_ex_module.h`):
 | Active level | HIGH |
 | Driver type  | GPIO (on/off only — no PWM brightness) |
 
-> Single-colour LED. Breathing effects are not supported; falls back to
-> blink or steady on/off in `ui_manager.c`.
+> The current verified SDK override disables this LED because GPIO1/UART
+> board initialization conflicts with the dedicated UART0 panel transport.
 
 ---
 

@@ -402,9 +402,5 @@ int uart_handler_init(void)
  * ======================================================================= */
 void uart_debug_puts(const char *str)
 {
-    if (!str) return;
-    size_t len = strlen(str);
-    if (len > 0 && g_initialised) {
-        tal_uart_write(NIGHTSHIFT_UART_PORT, (const uint8_t *)str, (uint32_t)len);
-    }
+    (void)str;
 }

@@ -1,21 +1,30 @@
-"""Quick scan of all COM ports at multiple baud rates."""
-import serial
-import time
+"""Enumerate serial devices and sniff for valid T5-Link traffic."""
 
-ports = ["COM5", "COM6", "COM7"]
-bauds = [115200, 460800]
+from __future__ import annotations
 
-for port in ports:
-    for baud in bauds:
-        try:
-            s = serial.Serial(port, baud, timeout=2)
-            data = s.read(1024)
-            s.close()
-            if data:
-                text = data.decode("utf-8", "replace")
-                print(f"=== {port} @ {baud} === {len(data)} bytes ===")
-                print(text[:500])
-            else:
-                print(f"=== {port} @ {baud} === (nothing)")
-        except Exception as e:
-            print(f"=== {port} @ {baud} === ERROR: {e}")
+import argparse
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+from t5_link import discover_serial_ports, sniff_protocol_port
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sniff-seconds", type=float, default=1.0)
+    args = parser.parse_args()
+    ports = discover_serial_ports()
+    for port in ports:
+        print(f"{port['device']:6}  {port['description']}")
+        print(f"        {port['hwid']}")
+    match = sniff_protocol_port(args.sniff_seconds)
+    if match:
+        print(f"T5-Link traffic detected on {match}")
+        return 0
+    print("No valid T5-Link frames observed; select the CH342 interface by descriptor.")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "nightshift_config.h"
 
 /* =========================================================================
  * Wire helpers — little-endian read / write
@@ -49,6 +50,7 @@
 #define T5_MAGIC_BYTE0        0x54   /* 'T' */
 #define T5_MAGIC_BYTE1        0x35   /* '5' */
 #define T5_PROTO_VERSION      0x01
+#define T5_PROTO_MINOR        0x00
 
 /* =========================================================================
  * Command IDs
@@ -81,6 +83,32 @@
 #define T5_CMD_LED_OVERRIDE       0x3001
 #define T5_CMD_BACKLIGHT_SET      0x3002
 
+/* UI action values */
+#define T5_ACTION_CONFIRM          1
+#define T5_ACTION_REJECT           2
+#define T5_ACTION_RETRY            3
+#define T5_ACTION_PAUSE_EXECUTION  4
+#define T5_ACTION_RESUME_EXECUTION 5
+#define T5_ACTION_OPEN_TASK        6
+#define T5_ACTION_CLOSE_TASK       7
+#define T5_ACTION_DISMISS_NOTICE   12
+/* Minor-compatible Nightshift extension. Older hosts safely log/ignore it. */
+#define T5_ACTION_REQUEST_RESYNC   13
+
+/* UI object types used by Nightshift. */
+#define T5_OBJECT_NONE             0
+#define T5_OBJECT_TASK             1
+#define T5_OBJECT_NOTICE           2
+#define T5_OBJECT_EXECUTOR         3
+#define T5_OBJECT_PANEL            4
+
+/* Notice severities and flags. */
+#define T5_NOTICE_INFO             0
+#define T5_NOTICE_WARNING          1
+#define T5_NOTICE_ERROR            2
+#define T5_NOTICE_CRITICAL         3
+#define T5_NOTICE_DISMISSIBLE      0x01
+
 /* =========================================================================
  * Flag bits (frame.flags field)
  * ======================================================================= */
@@ -89,6 +117,7 @@
 #define T5_FLAG_EVENT          0x04
 #define T5_FLAG_MORE           0x08
 #define T5_FLAG_HIGH_PRIORITY  0x10
+#define T5_FLAG_VALID_MASK     0x1F
 
 /* =========================================================================
  * Status codes (response payload u16LE prefix)
@@ -143,7 +172,7 @@ typedef struct {
     uint16_t seq;
     uint16_t cmd;
     uint16_t payload_len;
-    uint8_t  payload[1024];   /* NIGHTSHIFT_MAX_PAYLOAD */
+    uint8_t  payload[NIGHTSHIFT_MAX_PAYLOAD];
 } t5_frame_t;
 
 /* =========================================================================
@@ -184,5 +213,8 @@ size_t t5_frame_encode(const t5_frame_t *frame,
  */
 int t5_frame_decode(const uint8_t *cobs_data, size_t len,
                     t5_frame_t *frame);
+
+/** Return non-zero when a flag combination is structurally valid. */
+int t5_frame_flags_valid(uint8_t flags);
 
 #endif /* T5_PROTOCOL_H */

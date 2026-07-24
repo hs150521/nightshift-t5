@@ -1,0 +1,60 @@
+{
+  "golden_vectors": [
+    {
+      "name": "hello_request",
+      "sequence": 1,
+      "command": 1,
+      "command_name": "0x1",
+      "raw_hex": "0654350101010201021d03010105785634120504ff0110136e6967687473686966742f302e312e3003a600"
+    },
+    {
+      "name": "heartbeat_request",
+      "sequence": 2,
+      "command": 2,
+      "command_name": "0x2",
+      "raw_hex": "06543501010202020208038813010201010103a80b00"
+    },
+    {
+      "name": "heartbeat_response",
+      "sequence": 2,
+      "command": 2,
+      "command_name": "0x2",
+      "raw_hex": "0654350102020202020e020103701701020101010101010103a88b00"
+    },
+    {
+      "name": "mode_set_night_exec",
+      "sequence": 3,
+      "command": 4097,
+      "command_name": "0x1001",
+      "raw_hex": "0654350101030401101102020101020201010104a0860101010101033c1900"
+    },
+    {
+      "name": "attention_set_need_confirm",
+      "sequence": 4,
+      "command": 4098,
+      "command_name": "0x1002",
+      "raw_hex": "0654350101040402101102020101020101010202020508636865636bd73d00"
+    },
+    {
+      "name": "work_state_set_running",
+      "sequence": 5,
+      "command": 4099,
+      "command_name": "0x1003",
+      "raw_hex": "0654350101050403101d0402f401010264010102320101023c01010207010102060964656d6f474513dd00"
+    },
+    {
+      "name": "dashboard_set",
+      "sequence": 6,
+      "command": 4100,
+      "command_name": "0x1004",
+      "raw_hex": "065435010106040410100202010102010202020302040205020603a45b00"
+    },
+    {
+      "name": "ui_action_confirm",
+      "sequence": 7,
+      "command": 8193,
+      "command_name": "0x2001",
+      "raw_hex": "0654350102070401200201010332db00"
+    }
+  ]
+}
