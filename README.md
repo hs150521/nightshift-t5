@@ -21,9 +21,9 @@ Communication uses **T5-Link v1** — a lightweight binary protocol over UART
 
 | OPi pin | T5 pin | Signal |
 |---------|--------|--------|
-| TX      | PIN 40 (UART2 RX) | OPi → T5 data |
-| RX      | PIN 41 (UART2 TX) | T5 → OPi data |
-| GND     | GND    | Common ground |
+| Pin 27 (UART3 TX) | P11 Pin 12 (P10, UART0 RX) | OPi → T5 data |
+| Pin 28 (UART3 RX) | P11 Pin 14 (P11, UART0 TX) | T5 → OPi data |
+| GND | GND | Common ground |
 
 > Only three wires are needed. No flow-control lines required.
 
@@ -82,7 +82,7 @@ nightshift-t5/
 ├── src/
 │   ├── main.c                  # Application entry point & init sequence
 │   ├── t5_protocol.h / .c      # Frame codec (COBS, CRC-16, encode/decode)
-│   ├── uart_handler.h / .c     # UART2 transport & RX task
+│   ├── uart_handler.h / .c     # UART0 transport & RX task
 │   ├── command_handler.h / .c  # Command dispatcher (routes frames → state)
 │   ├── app_state.h / .c        # Global state mirror with revision guard
 │   └── ui_manager.h / .c       # LVGL UI: mode pages, overlay, LED control
