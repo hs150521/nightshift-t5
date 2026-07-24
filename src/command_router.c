@@ -117,15 +117,12 @@ static uint16_t handle_sync_end(const uint8_t *p, uint16_t len)
 
 static uint16_t handle_mode(const uint8_t *p, uint16_t len)
 {
-    /*
-     * The live Orange Pi golden vectors freeze reason as u32:
-     * revision:u32, mode:u8, reason:u32, changed_at_ms:u64.
-     */
-    if (len != 17) return T5_STATUS_INVALID_LEN;
+    /* revision:u32, mode:u8, reason:u8, changed_at_ms:u64 */
+    if (len != 14) return T5_STATUS_INVALID_LEN;
     if (p[4] > T5_MODE_NIGHT_EXEC) return T5_STATUS_INVALID_ARG;
     return map_result(state_store_set_mode(READ_U32_LE(p), p[4],
-                                            READ_U32_LE(p + 5),
-                                            READ_U64_LE(p + 9)));
+                                            p[5],
+                                            READ_U64_LE(p + 6)));
 }
 
 static uint16_t handle_attention(const uint8_t *p, uint16_t len)
@@ -142,18 +139,18 @@ static uint16_t handle_attention(const uint8_t *p, uint16_t len)
 static uint16_t handle_work(const uint8_t *p, uint16_t len)
 {
     char title[NIGHTSHIFT_CURRENT_TITLE_SIZE];
-    /* Frozen Orange Pi wire format intentionally has no revision field. */
-    if (len < 23 ||
-        !exact_one_string(p, len, 21, title, sizeof(title))) {
+    /* revision:u32 + <BHHIIII> + string */
+    if (len < 27 ||
+        !exact_one_string(p, len, 25, title, sizeof(title))) {
         return T5_STATUS_INVALID_LEN;
     }
-    if (p[0] > T5_WORK_FAILED || READ_U16_LE(p + 1) > 1000) {
+    if (p[4] > T5_WORK_FAILED || READ_U16_LE(p + 5) > 1000) {
         return T5_STATUS_INVALID_ARG;
     }
     return map_result(state_store_set_work(
-        p[0], READ_U16_LE(p + 1), READ_U32_LE(p + 5),
+        READ_U32_LE(p), p[4], READ_U16_LE(p + 5),
         READ_U32_LE(p + 9), READ_U32_LE(p + 13),
-        READ_U32_LE(p + 17), title));
+        READ_U32_LE(p + 17), READ_U32_LE(p + 21), title));
 }
 
 static uint16_t handle_dashboard(const uint8_t *p, uint16_t len)

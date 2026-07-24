@@ -92,7 +92,6 @@
 #define T5_ACTION_OPEN_TASK        6
 #define T5_ACTION_CLOSE_TASK       7
 #define T5_ACTION_DISMISS_NOTICE   12
-/* Minor-compatible Nightshift extension. Older hosts safely log/ignore it. */
 #define T5_ACTION_REQUEST_RESYNC   13
 
 /* UI object types used by Nightshift. */

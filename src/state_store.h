@@ -34,7 +34,7 @@ typedef struct {
 typedef struct {
     uint32_t revision;
     uint8_t mode;
-    uint32_t mode_reason;
+    uint8_t mode_reason;
     uint64_t mode_changed_at_ms;
 
     uint32_t attention_flags;
@@ -99,13 +99,14 @@ void state_store_sync_record(uint16_t command,
                              const uint8_t *payload, uint16_t payload_len);
 
 state_store_result_t state_store_set_mode(uint32_t revision, uint8_t mode,
-                                           uint32_t reason,
+                                           uint8_t reason,
                                            uint64_t changed_at_ms);
 state_store_result_t state_store_set_attention(uint32_t revision,
                                                 uint32_t flags,
                                                 uint16_t count,
                                                 const char *message);
-state_store_result_t state_store_set_work(uint8_t work_state,
+state_store_result_t state_store_set_work(uint32_t revision,
+                                          uint8_t work_state,
                                           uint16_t progress,
                                           uint32_t token_input,
                                           uint32_t token_output,

@@ -42,8 +42,9 @@ Communication uses **T5-Link v1** — a lightweight binary protocol over UART
 | Max payload | 1 024 bytes |
 | Heartbeat | 2 s interval, 6 s timeout |
 
-See [docs/t5-link-v1.md](docs/t5-link-v1.md) for the frozen layouts and
-the deliberate compatibility decisions against the Orange Pi golden vectors.
+See [contracts/uart/commands.yaml](contracts/uart/commands.yaml) for the
+independent frozen wire schema and [docs/t5-link-v1.md](docs/t5-link-v1.md)
+for implementation rules.
 
 ---
 
@@ -80,12 +81,14 @@ the verified SDK board override disables it to preserve UART0 P10/P11.
 
 ```powershell
 python -m unittest discover -s tests -v
-python tools/sync_golden_vectors.py --check
+python tools/regenerate_golden_vectors.py
+python tools/sync_golden_vectors.py --source-root ../nightshift-opi
 ```
 
 The suite covers golden frames, malformed COBS, CRC/length/version/flag errors,
-field offsets, heartbeat response size, duplicate replay, revision rejection,
-atomic state/task replacement, UI action encoding, and watchdog recovery.
+field offsets, heartbeat response layout, duplicate replay, sync rollback and
+stale revision rejection, atomic state/task replacement, UI action encoding
+and bounded retransmission, and heartbeat-only watchdog recovery.
 
 ---
 
@@ -106,7 +109,7 @@ nightshift-t5/
 │   ├── state_store.*           # Atomic committed/staging state
 │   ├── uart_transport.*        # UART0 RX/TX, events, watchdog
 │   └── panel_ui.*              # LVGL UI and touch controls
-├── contracts/uart/             # Canonical Orange Pi golden vectors
+├── contracts/uart/             # Independent frozen schema and wire vectors
 ├── tests/                      # Host protocol/state tests
 ├── tools/                      # Host codec and synchronization tooling
 └── docs/                       # Wiring, protocol, build/flash notes

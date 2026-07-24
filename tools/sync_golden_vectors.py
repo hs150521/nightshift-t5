@@ -1,4 +1,4 @@
-"""Copy and verify the canonical Orange Pi UART golden-vector artifact."""
+"""Verify both endpoint copies of the independent frozen UART contract."""
 
 from __future__ import annotations
 
@@ -9,41 +9,28 @@ from pathlib import Path
 
 def normalized_vectors(path: Path) -> list[dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
-    return [
-        {
-            "name": item["name"],
-            "sequence": item["sequence"],
-            "command": item["command"],
-            "command_name": item["command_name"],
-            "raw_hex": item["raw_hex"],
-        }
-        for item in data["golden_vectors"]
-    ]
+    return data["golden_vectors"]
 
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--source",
+        "--source-root",
         type=Path,
-        default=root.parent / "nightshift-opi" / "contracts" / "uart" / "golden_vectors.json",
+        default=root.parent / "nightshift-opi",
     )
-    parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    target = root / "contracts" / "uart" / "golden_vectors.json"
-    source_vectors = normalized_vectors(args.source)
-    target_vectors = normalized_vectors(target)
-    if args.check:
-        if source_vectors != target_vectors:
-            raise SystemExit("golden vectors differ from Orange Pi contract")
-        print(f"golden vectors match {args.source}")
-        return 0
-    target.write_text(
-        json.dumps({"golden_vectors": source_vectors}, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"updated {target} from {args.source}")
+    target_dir = root / "contracts" / "uart"
+    source_dir = args.source_root / "contracts" / "uart"
+    target_schema = (target_dir / "commands.yaml").read_text(encoding="utf-8")
+    source_schema = (source_dir / "commands.yaml").read_text(encoding="utf-8")
+    if target_schema.replace("\r\n", "\n") != source_schema.replace("\r\n", "\n"):
+        raise SystemExit("shared commands.yaml copies differ")
+    if normalized_vectors(target_dir / "golden_vectors.json") != \
+            normalized_vectors(source_dir / "golden_vectors.json"):
+        raise SystemExit("canonical golden vectors differ")
+    print(f"schema and golden vectors match {args.source_root}")
     return 0
 
 

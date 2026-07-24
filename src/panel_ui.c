@@ -108,13 +108,7 @@ static void set_enabled(lv_obj_t *object, bool enabled)
 
 static uint32_t confirmation_object_id(void)
 {
-    if (g_visible_state.current_task_id != 0) {
-        return g_visible_state.current_task_id;
-    }
-    if (g_visible_state.task_count != 0) {
-        return g_visible_state.tasks[0].task_id;
-    }
-    return 0;
+    return g_visible_state.current_task_id;
 }
 
 static void send_action(uint16_t action, uint8_t object_type,
@@ -126,30 +120,35 @@ static void send_action(uint16_t action, uint8_t object_type,
 static void on_confirm(lv_event_t *event)
 {
     (void)event;
-    send_action(T5_ACTION_CONFIRM, T5_OBJECT_TASK,
-                confirmation_object_id());
+    uint32_t task_id = confirmation_object_id();
+    if (task_id != 0) {
+        send_action(T5_ACTION_CONFIRM, T5_OBJECT_TASK, task_id);
+    }
 }
 
 static void on_reject(lv_event_t *event)
 {
     (void)event;
-    send_action(T5_ACTION_REJECT, T5_OBJECT_TASK,
-                confirmation_object_id());
+    uint32_t task_id = confirmation_object_id();
+    if (task_id != 0) {
+        send_action(T5_ACTION_REJECT, T5_OBJECT_TASK, task_id);
+    }
 }
 
 static void on_work(lv_event_t *event)
 {
     (void)event;
-    uint16_t action;
     if (g_visible_state.work_state == T5_WORK_RUNNING) {
-        action = T5_ACTION_PAUSE_EXECUTION;
+        send_action(T5_ACTION_PAUSE_EXECUTION, T5_OBJECT_EXECUTOR,
+                    g_visible_state.current_task_id);
     } else if (g_visible_state.work_state == T5_WORK_PAUSED) {
-        action = T5_ACTION_RESUME_EXECUTION;
-    } else {
-        action = T5_ACTION_RETRY;
+        send_action(T5_ACTION_RESUME_EXECUTION, T5_OBJECT_EXECUTOR,
+                    g_visible_state.current_task_id);
+    } else if (g_visible_state.work_state == T5_WORK_FAILED &&
+               g_visible_state.current_task_id != 0) {
+        send_action(T5_ACTION_RETRY, T5_OBJECT_TASK,
+                    g_visible_state.current_task_id);
     }
-    send_action(action, T5_OBJECT_EXECUTOR,
-                g_visible_state.current_task_id);
 }
 
 static void on_dismiss(lv_event_t *event)
@@ -351,10 +350,14 @@ static void update_controls(const display_state_t *state)
     bool confirmation = (state->attention_flags & T5_ATTN_NEED_CONFIRM) != 0;
     bool work_control = state->work_state == T5_WORK_RUNNING ||
                         state->work_state == T5_WORK_PAUSED ||
-                        state->work_state == T5_WORK_FAILED;
+                        (state->work_state == T5_WORK_FAILED &&
+                         state->current_task_id != 0);
+    bool has_confirmation_task = confirmation_object_id() != 0;
 
-    set_enabled(g_confirm_button, ready && confirmation);
-    set_enabled(g_reject_button, ready && confirmation);
+    set_enabled(g_confirm_button,
+                ready && confirmation && has_confirmation_task);
+    set_enabled(g_reject_button,
+                ready && confirmation && has_confirmation_task);
     set_enabled(g_work_button, ready && work_control);
     set_enabled(g_dismiss_button, ready && state->notice.active &&
                 (state->notice.flags & T5_NOTICE_DISMISSIBLE));

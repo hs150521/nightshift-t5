@@ -53,6 +53,7 @@
 
 /* UI events wait this long for an Orange Pi acknowledgement. */
 #define NIGHTSHIFT_ACTION_ACK_TIMEOUT_MS 1500
+#define NIGHTSHIFT_ACTION_MAX_RETRIES    2
 
 /* -------------------------------------------------------------------------
  * Firmware identification

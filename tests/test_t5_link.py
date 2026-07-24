@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from t5_link import (  # noqa: E402
-    ACK_REQ, EVENT, Frame, ProtocolError, RequestCache, StateSimulator,
-    StreamAccumulator,
+    ACK_REQ, EVENT, RESPONSE, ActionRetrySimulator, Frame, ProtocolError,
+    RequestCache, StateSimulator, StreamAccumulator,
     cobs_decode, cobs_encode, encode_ui_action,
 )
 
@@ -57,16 +57,24 @@ class CodecTests(unittest.TestCase):
     def test_mode_set_golden_offsets(self) -> None:
         vector = next(v for v in self.vectors() if v["name"] == "mode_set_night_exec")
         payload = Frame.decode(bytes.fromhex(vector["raw_hex"])).payload
-        self.assertEqual(len(payload), 17)
-        self.assertEqual(struct.unpack("<IBIQ", payload), (2, 2, 0, 100000))
+        self.assertEqual(len(payload), 14)
+        self.assertEqual(
+            struct.unpack("<IBBQ", payload),
+            (7, 2, 2, 1_700_000_000_000),
+        )
 
     def test_work_state_and_heartbeat_lengths(self) -> None:
         work = next(v for v in self.vectors() if v["name"] == "work_state_set_running")
         payload = Frame.decode(bytes.fromhex(work["raw_hex"])).payload
-        self.assertEqual(len(payload), 29)
-        self.assertEqual(struct.unpack("<BHHIIII", payload[:21]), (2, 500, 0, 100, 50, 60, 7))
+        self.assertEqual(len(payload), 31)
+        self.assertEqual(
+            struct.unpack("<IBHHIIII", payload[:25]),
+            (7, 2, 500, 0, 100, 50, 60, 42),
+        )
         heartbeat = next(v for v in self.vectors() if v["name"] == "heartbeat_response")
-        self.assertEqual(len(Frame.decode(bytes.fromhex(heartbeat["raw_hex"])).payload), 14)
+        hb_payload = Frame.decode(bytes.fromhex(heartbeat["raw_hex"])).payload
+        self.assertEqual(len(hb_payload), 14)
+        self.assertEqual(struct.unpack("<HIII", hb_payload), (0, 6000, 7, 0))
 
     def test_ui_action_payload_layout(self) -> None:
         payload = encode_ui_action(1, 1, 0x12345678, -4, "ok")
@@ -90,6 +98,16 @@ class CodecTests(unittest.TestCase):
         self.assertEqual(fixed, (9, 44, 1, 1, 123456))
         title_len = struct.unpack("<H", payload[18:20])[0]
         self.assertEqual(payload[20:20 + title_len], title)
+
+    def test_schema_formally_defines_extended_payloads(self) -> None:
+        schema = (ROOT / "contracts/uart/commands.yaml").read_text()
+        for command in (
+            "NOTICE_SHOW:", "PAGE_EVENT:", "LED_OVERRIDE:",
+            "BACKLIGHT_SET:",
+        ):
+            self.assertGreaterEqual(schema.count(command), 2)
+        self.assertIn("- { name: status, type: u16 }", schema)
+        self.assertIn("- { name: reason, type: u8 }", schema)
 
 
 class StateTests(unittest.TestCase):
@@ -119,9 +137,16 @@ class StateTests(unittest.TestCase):
         state.begin(6)
         state.set("mode", 2, revision=6)
         state.set("attention", 1, revision=6)
-        state.set("work", 2)
+        state.set("work", 2, revision=6)
         state.end(6)
         self.assertEqual((state.committed["revision"], state.committed["mode"]), (6, 2))
+        with self.assertRaises(ProtocolError):
+            state.begin(5)
+        state.begin(6)  # Explicit same-revision resync is allowed.
+        state.set("mode", 2, revision=6)
+        state.set("attention", 1, revision=6)
+        state.set("work", 2, revision=6)
+        state.end(6)
 
     def test_task_list_atomic_replacement(self) -> None:
         state = StateSimulator()
@@ -140,13 +165,38 @@ class StateTests(unittest.TestCase):
 
     def test_watchdog_transition_and_recovery(self) -> None:
         state = StateSimulator()
-        state.communication(100)
+        state.hello(100)
+        state.ordinary_command(5000)
         state.watchdog(6099)
         self.assertTrue(state.committed["online"])
         state.watchdog(6100)
         self.assertFalse(state.committed["online"])
-        state.communication(6200)
+        state.ordinary_command(6150)
+        self.assertFalse(state.committed["online"])
+        state.heartbeat(6200)
         self.assertTrue(state.committed["online"])
+        state.ordinary_command(12_000)
+        state.watchdog(12_200)
+        self.assertFalse(state.committed["online"])
+
+    def test_ui_action_retry_reuses_exact_frame_and_is_bounded(self) -> None:
+        event = Frame(
+            EVENT | ACK_REQ, 55, 0x2001,
+            encode_ui_action(3, 1, 42, 0, ""),
+        )
+        pending = ActionRetrySimulator(event, sent_ms=100)
+        original = event.encode()
+        self.assertIsNone(pending.poll(1599))
+        self.assertEqual(pending.poll(1600), original)
+        self.assertEqual(pending.poll(3100), original)
+        self.assertEqual((pending.retries, event.sequence), (2, 55))
+        self.assertIsNone(pending.poll(4600))
+        self.assertFalse(pending.active)
+
+        pending = ActionRetrySimulator(event, sent_ms=100)
+        response = Frame(RESPONSE, 55, 0x2001, struct.pack("<H", 0))
+        self.assertTrue(pending.acknowledge(response))
+        self.assertFalse(pending.active)
 
 
 if __name__ == "__main__":

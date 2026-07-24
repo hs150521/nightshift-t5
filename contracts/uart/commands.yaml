@@ -1,0 +1,246 @@
+t5_link_v1:
+  contract_status: frozen
+  magic: [0x54, 0x35]
+  version: 1
+  max_payload: 1024
+  byte_order: little_endian
+  crc: CRC-16/CCITT-FALSE
+  framing: COBS
+  string: u16_byte_length_plus_utf8
+
+  flags:
+    ACK_REQ: 0x01
+    RESPONSE: 0x02
+    EVENT: 0x04
+    MORE: 0x08
+    HIGH_PRIORITY: 0x10
+
+  status:
+    OK: 0x0000
+    ACCEPTED: 0x0001
+    UNKNOWN_COMMAND: 0x0002
+    INVALID_LENGTH: 0x0003
+    INVALID_ARGUMENT: 0x0004
+    BUSY: 0x0005
+    NOT_READY: 0x0006
+    NOT_FOUND: 0x0007
+    INTERNAL_ERROR: 0x0008
+    UNSUPPORTED_VERSION: 0x0009
+    NO_SPACE: 0x000A
+    STATE_CONFLICT: 0x000B
+
+  capabilities:
+    LCD: 0x0001
+    TOUCH: 0x0002
+    LED: 0x0004
+    SPEAKER: 0x0008
+    MICROPHONE: 0x0010
+    ASSET_STORAGE: 0x0020
+    AUDIO_STREAM: 0x0040
+    LOCAL_ANIMATION: 0x0080
+
+  modes:
+    IDLE: 0
+    DAY_WORK: 1
+    NIGHT_EXEC: 2
+
+  work_states:
+    STOPPED: 0
+    STARTING: 1
+    RUNNING: 2
+    PAUSED: 3
+    COMPLETED: 4
+    FAILED: 5
+
+  ui_actions:
+    CONFIRM: 1
+    REJECT: 2
+    RETRY: 3
+    PAUSE_EXECUTION: 4
+    RESUME_EXECUTION: 5
+    OPEN_TASK: 6
+    CLOSE_TASK: 7
+    START_VOICE: 8
+    STOP_VOICE: 9
+    NEXT_PAGE: 10
+    PREVIOUS_PAGE: 11
+    DISMISS_NOTICE: 12
+    REQUEST_RESYNC: 13
+
+  object_types:
+    NONE: 0
+    TASK: 1
+    NOTICE: 2
+    EXECUTOR: 3
+    PANEL: 4
+
+  commands:
+    HELLO: 0x0001
+    HEARTBEAT: 0x0002
+    GET_INFO: 0x0003
+    TIME_SYNC: 0x0004
+    STATE_SYNC_BEGIN: 0x0010
+    STATE_SYNC_END: 0x0011
+    MODE_SET: 0x1001
+    ATTENTION_SET: 0x1002
+    WORK_STATE_SET: 0x1003
+    DASHBOARD_SET: 0x1004
+    NOTICE_SHOW: 0x1005
+    TASK_LIST_BEGIN: 0x1101
+    TASK_ITEM: 0x1102
+    TASK_LIST_END: 0x1103
+    UI_ACTION: 0x2001
+    PAGE_EVENT: 0x2002
+    TOUCH_EVENT_DEBUG: 0x2003
+    LED_OVERRIDE: 0x3001
+    BACKLIGHT_SET: 0x3002
+    AUDIO_PLAY: 0x4001
+    AUDIO_STOP: 0x4002
+    VOLUME_SET: 0x4003
+    AUDIO_EVENT: 0x4004
+    MIC_START: 0x4010
+    MIC_STOP: 0x4011
+    MIC_EVENT: 0x4012
+
+  payloads:
+    HELLO:
+      request:
+        - { name: peer_role, type: u8 }
+        - { name: protocol_major, type: u8 }
+        - { name: protocol_minor, type: u8 }
+        - { name: boot_id, type: u32 }
+        - { name: max_payload, type: u16 }
+        - { name: capabilities, type: u16 }
+        - { name: software_version, type: string }
+
+    HEARTBEAT:
+      request:
+        - { name: uptime_ms, type: u32 }
+        - { name: state_revision, type: u32 }
+      response:
+        - { name: status, type: u16 }
+        - { name: t5_uptime_ms, type: u32 }
+        - { name: applied_revision, type: u32 }
+        - { name: error_flags, type: u32 }
+
+    GET_INFO:
+      response:
+        - { name: status, type: u16 }
+        - { name: protocol_major, type: u8 }
+        - { name: protocol_minor, type: u8 }
+        - { name: max_payload, type: u16 }
+        - { name: capabilities, type: u32 }
+        - { name: display_width, type: u16 }
+        - { name: display_height, type: u16 }
+        - { name: color_bits, type: u8 }
+        - { name: max_tasks, type: u8 }
+        - { name: firmware_version, type: string }
+        - { name: board_name, type: string }
+
+    TIME_SYNC:
+      request:
+        - { name: unix_time_ms, type: u64 }
+        - { name: utc_offset_minutes, type: i16 }
+
+    STATE_SYNC_BEGIN:
+      request:
+        - { name: target_revision, type: u32 }
+        - { name: sync_reason, type: u8 }
+
+    STATE_SYNC_END:
+      request:
+        - { name: target_revision, type: u32 }
+        - { name: snapshot_crc32, type: u32 }
+
+    MODE_SET:
+      request:
+        - { name: revision, type: u32 }
+        - { name: mode, type: u8 }
+        - { name: reason, type: u8 }
+        - { name: changed_at_ms, type: u64 }
+
+    ATTENTION_SET:
+      request:
+        - { name: revision, type: u32 }
+        - { name: attention_flags, type: u32 }
+        - { name: confirmation_count, type: u16 }
+        - { name: short_message, type: string }
+
+    WORK_STATE_SET:
+      request:
+        - { name: revision, type: u32 }
+        - { name: work_state, type: u8 }
+        - { name: progress_permille, type: u16 }
+        - { name: reserved, type: u16 }
+        - { name: token_input, type: u32 }
+        - { name: token_output, type: u32 }
+        - { name: elapsed_seconds, type: u32 }
+        - { name: current_task_id, type: u32 }
+        - { name: current_task_title, type: string }
+
+    DASHBOARD_SET:
+      request:
+        - { name: revision, type: u32 }
+        - { name: urgent_auto, type: u16 }
+        - { name: normal_auto, type: u16 }
+        - { name: urgent_confirm, type: u16 }
+        - { name: normal_confirm, type: u16 }
+        - { name: completed_today, type: u16 }
+        - { name: failed_today, type: u16 }
+
+    NOTICE_SHOW:
+      request:
+        - { name: revision, type: u32 }
+        - { name: notice_id, type: u32 }
+        - { name: severity, type: u8 }
+        - { name: flags, type: u8 }
+        - { name: expires_at_ms, type: u64 }
+        - { name: title, type: string }
+        - { name: body, type: string }
+
+    TASK_LIST_BEGIN:
+      request:
+        - { name: revision, type: u32 }
+        - { name: list_type, type: u8 }
+        - { name: item_count, type: u16 }
+
+    TASK_ITEM:
+      request:
+        - { name: revision, type: u32 }
+        - { name: task_id, type: u32 }
+        - { name: quadrant, type: u8 }
+        - { name: task_state, type: u8 }
+        - { name: flags, type: u8 }
+        - { name: title, type: string }
+        - { name: source, type: string }
+
+    TASK_LIST_END:
+      request:
+        - { name: revision, type: u32 }
+        - { name: list_crc32, type: u32 }
+
+    UI_ACTION:
+      event_flags: [EVENT, ACK_REQ]
+      event:
+        - { name: action, type: u16 }
+        - { name: object_type, type: u8 }
+        - { name: object_id, type: u32 }
+        - { name: value, type: i32 }
+        - { name: text, type: string }
+
+    PAGE_EVENT:
+      event_flags: [EVENT]
+      event:
+        - { name: page_id, type: u8 }
+        - { name: event, type: u8 }
+        - { name: object_id, type: u32 }
+
+    LED_OVERRIDE:
+      request:
+        - { name: active, type: u8 }
+        - { name: mode, type: u8 }
+        - { name: period_ms, type: u16 }
+
+    BACKLIGHT_SET:
+      request:
+        - { name: percent, type: u8 }

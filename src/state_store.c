@@ -159,6 +159,10 @@ state_store_result_t state_store_sync_begin(uint32_t target_revision,
         tal_mutex_unlock(g_mutex);
         return STATE_STORE_BUSY;
     }
+    if (target_revision < g_committed.revision) {
+        tal_mutex_unlock(g_mutex);
+        return STATE_STORE_STALE;
+    }
     g_staging = g_committed;
     g_staging.revision = target_revision;
     g_staging.sync_in_progress = true;
@@ -244,7 +248,7 @@ void state_store_sync_record(uint16_t command,
 }
 
 state_store_result_t state_store_set_mode(uint32_t revision, uint8_t mode,
-                                           uint32_t reason,
+                                           uint8_t reason,
                                            uint64_t changed_at_ms)
 {
     display_state_t snapshot;
@@ -289,7 +293,8 @@ state_store_result_t state_store_set_attention(uint32_t revision,
     return result;
 }
 
-state_store_result_t state_store_set_work(uint8_t work_state,
+state_store_result_t state_store_set_work(uint32_t revision,
+                                          uint8_t work_state,
                                           uint16_t progress,
                                           uint32_t token_input,
                                           uint32_t token_output,
@@ -300,20 +305,24 @@ state_store_result_t state_store_set_work(uint8_t work_state,
     display_state_t snapshot;
     state_store_change_cb_t cb;
     tal_mutex_lock(g_mutex);
-    display_state_t *state = write_state_locked();
-    state->work_state = work_state;
-    state->progress_permille = progress;
-    state->token_input = token_input;
-    state->token_output = token_output;
-    state->elapsed_seconds = elapsed_seconds;
-    state->current_task_id = task_id;
-    copy_text(state->current_task_title,
-              sizeof(state->current_task_title), title);
-    if (g_sync_active) g_sync_components |= SYNC_HAVE_WORK;
-    prepare_notify_locked(true, &snapshot, &cb);
+    state_store_result_t result = revision_result_locked(revision);
+    if (result == STATE_STORE_OK) {
+        display_state_t *state = write_state_locked();
+        state->revision = revision;
+        state->work_state = work_state;
+        state->progress_permille = progress;
+        state->token_input = token_input;
+        state->token_output = token_output;
+        state->elapsed_seconds = elapsed_seconds;
+        state->current_task_id = task_id;
+        copy_text(state->current_task_title,
+                  sizeof(state->current_task_title), title);
+        if (g_sync_active) g_sync_components |= SYNC_HAVE_WORK;
+    }
+    prepare_notify_locked(result == STATE_STORE_OK, &snapshot, &cb);
     tal_mutex_unlock(g_mutex);
     notify(&snapshot, cb);
-    return STATE_STORE_OK;
+    return result;
 }
 
 state_store_result_t state_store_set_dashboard(uint32_t revision,

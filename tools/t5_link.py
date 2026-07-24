@@ -176,11 +176,16 @@ class StateSimulator:
         self.target = 0
         self.components: set[str] = set()
         self.task_txn: dict | None = None
-        self.last_activity_ms = 0
+        self.last_heartbeat_ms = 0
+        self.hello_grace_started_ms = 0
+        self.watchdog_active = False
+        self.waiting_first_heartbeat = False
 
     def begin(self, revision: int) -> None:
         if self.staging is not None:
             raise ProtocolError("sync busy")
+        if revision < self.committed["revision"]:
+            raise ProtocolError("sync rollback")
         self.staging = {
             key: list(value) if isinstance(value, list) else value
             for key, value in self.committed.items()
@@ -233,14 +238,74 @@ class StateSimulator:
         target = self.staging if self.staging is not None else self.committed
         target["tasks"] = txn["items"]
 
-    def communication(self, now_ms: int) -> None:
-        self.last_activity_ms = now_ms
+    def hello(self, now_ms: int) -> None:
+        if not self.watchdog_active:
+            self.hello_grace_started_ms = now_ms
+            self.watchdog_active = True
+            self.waiting_first_heartbeat = True
+            self.committed["online"] = True
+
+    def heartbeat(self, now_ms: int) -> None:
+        self.last_heartbeat_ms = now_ms
+        self.watchdog_active = True
+        self.waiting_first_heartbeat = False
         self.committed["online"] = True
 
+    def ordinary_command(self, now_ms: int) -> None:
+        del now_ms
+
     def watchdog(self, now_ms: int, timeout_ms: int = 6000) -> None:
-        if self.last_activity_ms and now_ms - self.last_activity_ms >= timeout_ms:
+        if not self.watchdog_active:
+            return
+        reference = (
+            self.hello_grace_started_ms
+            if self.waiting_first_heartbeat
+            else self.last_heartbeat_ms
+        )
+        if reference and now_ms - reference >= timeout_ms:
             self.committed["online"] = False
             self.staging = None
+            self.watchdog_active = False
+            self.waiting_first_heartbeat = False
+
+
+class ActionRetrySimulator:
+    """Models bounded ACK retry while preserving the exact encoded frame."""
+
+    def __init__(self, frame: Frame, sent_ms: int,
+                 timeout_ms: int = 1500, max_retries: int = 2) -> None:
+        self.frame = frame
+        self.wire = frame.encode()
+        self.sent_ms = sent_ms
+        self.timeout_ms = timeout_ms
+        self.max_retries = max_retries
+        self.retries = 0
+        self.active = True
+        self.status: int | None = None
+
+    def poll(self, now_ms: int) -> bytes | None:
+        if not self.active or now_ms - self.sent_ms < self.timeout_ms:
+            return None
+        if self.retries < self.max_retries:
+            self.retries += 1
+            self.sent_ms = now_ms
+            return self.wire
+        self.active = False
+        self.status = 6  # NOT_READY
+        return None
+
+    def acknowledge(self, frame: Frame) -> bool:
+        if (
+            not self.active
+            or not frame.flags & RESPONSE
+            or frame.sequence != self.frame.sequence
+            or frame.command != self.frame.command
+            or len(frame.payload) < 2
+        ):
+            return False
+        self.status = struct.unpack("<H", frame.payload[:2])[0]
+        self.active = False
+        return True
 
 
 def discover_serial_ports() -> list[dict[str, str]]:

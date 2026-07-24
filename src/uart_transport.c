@@ -18,10 +18,10 @@
 
 typedef struct {
     bool active;
-    uint16_t sequence;
-    uint16_t command;
     uint16_t action;
     uint32_t sent_ms;
+    uint8_t retries;
+    t5_frame_t frame;
 } pending_event_t;
 
 static request_cache_t g_request_cache;
@@ -32,7 +32,9 @@ static MUTEX_HANDLE g_link_mutex;
 static THREAD_HANDLE g_rx_thread;
 static THREAD_HANDLE g_watchdog_thread;
 static uint32_t g_last_heartbeat_ms;
-static uint32_t g_last_activity_ms;
+static uint32_t g_hello_grace_started_ms;
+static bool g_heartbeat_watchdog_active;
+static bool g_waiting_first_heartbeat;
 static uint16_t g_out_sequence;
 static bool g_initialized;
 
@@ -72,19 +74,29 @@ static int send_response(uint16_t sequence, uint16_t command,
     return uart_transport_send_frame(&frame);
 }
 
-static void mark_valid_request(uint16_t command)
+static void mark_valid_liveness(uint16_t command)
 {
     uint32_t now = tal_system_get_millisecond();
+    bool mark_online = false;
     tal_mutex_lock(g_link_mutex);
-    g_last_activity_ms = now;
     if (command == T5_CMD_HEARTBEAT) {
         g_last_heartbeat_ms = now;
-    } else if (command == T5_CMD_HELLO && g_last_heartbeat_ms == 0) {
-        /* Grace period for the first heartbeat after handshake. */
-        g_last_heartbeat_ms = now;
+        g_heartbeat_watchdog_active = true;
+        g_waiting_first_heartbeat = false;
+        mark_online = true;
+    } else if (command == T5_CMD_HELLO &&
+               !g_heartbeat_watchdog_active) {
+        /*
+         * Start one grace window for the first heartbeat. Repeated HELLO
+         * requests during the same window cannot extend the deadline.
+         */
+        g_hello_grace_started_ms = now;
+        g_heartbeat_watchdog_active = true;
+        g_waiting_first_heartbeat = true;
+        mark_online = true;
     }
     tal_mutex_unlock(g_link_mutex);
-    state_store_set_online(true);
+    if (mark_online) state_store_set_online(true);
 }
 
 static void handle_response(const t5_frame_t *frame)
@@ -97,8 +109,8 @@ static void handle_response(const t5_frame_t *frame)
 
     tal_mutex_lock(g_link_mutex);
     if (g_pending_event.active &&
-        frame->seq == g_pending_event.sequence &&
-        frame->cmd == g_pending_event.command) {
+        frame->seq == g_pending_event.frame.seq &&
+        frame->cmd == g_pending_event.frame.cmd) {
         action = g_pending_event.action;
         memset(&g_pending_event, 0, sizeof(g_pending_event));
         matched = true;
@@ -112,6 +124,9 @@ static void process_request(const t5_frame_t *frame)
     const request_cache_entry_t *cached =
         request_cache_find(&g_request_cache, frame->seq, frame->cmd);
     if (cached) {
+        if (cached->status == T5_STATUS_OK) {
+            mark_valid_liveness(frame->cmd);
+        }
         if (frame->flags & T5_FLAG_ACK_REQ) {
             send_response(frame->seq, frame->cmd, cached->status,
                           cached->data, cached->data_len);
@@ -125,6 +140,9 @@ static void process_request(const t5_frame_t *frame)
         frame->cmd, frame->payload, frame->payload_len,
         response, &response_len);
 
+    if (status == T5_STATUS_OK) {
+        mark_valid_liveness(frame->cmd);
+    }
     request_cache_store(&g_request_cache, frame->seq, frame->cmd,
                         status, response, response_len);
     if (frame->flags & T5_FLAG_ACK_REQ) {
@@ -142,7 +160,6 @@ static void process_frame(const t5_frame_t *frame)
     }
     /* Orange Pi commands are requests, never peer events. */
     if (frame->flags & T5_FLAG_EVENT) return;
-    mark_valid_request(frame->cmd);
     process_request(frame);
 }
 
@@ -178,26 +195,51 @@ static void watchdog_task(void *arg)
     (void)arg;
     for (;;) {
         uint32_t now = tal_system_get_millisecond();
-        uint32_t last_activity;
+        uint32_t heartbeat_reference = 0;
+        bool watchdog_active;
+        bool retry_action = false;
+        t5_frame_t retry_frame;
         bool action_expired = false;
         uint16_t expired_action = 0;
 
         tal_mutex_lock(g_link_mutex);
-        last_activity = g_last_activity_ms;
+        watchdog_active = g_heartbeat_watchdog_active;
+        if (watchdog_active) {
+            heartbeat_reference = g_waiting_first_heartbeat
+                                      ? g_hello_grace_started_ms
+                                      : g_last_heartbeat_ms;
+        }
         if (g_pending_event.active &&
             (uint32_t)(now - g_pending_event.sent_ms) >=
                 NIGHTSHIFT_ACTION_ACK_TIMEOUT_MS) {
-            expired_action = g_pending_event.action;
-            memset(&g_pending_event, 0, sizeof(g_pending_event));
-            action_expired = true;
+            if (g_pending_event.retries <
+                NIGHTSHIFT_ACTION_MAX_RETRIES) {
+                g_pending_event.retries++;
+                g_pending_event.sent_ms = now;
+                retry_frame = g_pending_event.frame;
+                retry_action = true;
+            } else {
+                expired_action = g_pending_event.action;
+                memset(&g_pending_event, 0, sizeof(g_pending_event));
+                action_expired = true;
+            }
+        }
+        if (watchdog_active && heartbeat_reference != 0 &&
+            (uint32_t)(now - heartbeat_reference) >=
+                NIGHTSHIFT_HEARTBEAT_TIMEOUT_MS) {
+            g_heartbeat_watchdog_active = false;
+            g_waiting_first_heartbeat = false;
         }
         tal_mutex_unlock(g_link_mutex);
 
-        if (last_activity != 0 &&
-            (uint32_t)(now - last_activity) >=
+        if (watchdog_active && heartbeat_reference != 0 &&
+            (uint32_t)(now - heartbeat_reference) >=
                 NIGHTSHIFT_HEARTBEAT_TIMEOUT_MS) {
             state_store_set_online(false);
             state_store_sync_abort();
+        }
+        if (retry_action) {
+            (void)uart_transport_send_frame(&retry_frame);
         }
         if (action_expired) {
             state_store_set_action(expired_action, false,
@@ -221,6 +263,17 @@ int uart_transport_send_ui_action(uint16_t action, uint8_t object_type,
 
     state_store_snapshot(&state);
     if (!state.opi_online || state.action_pending) return -1;
+    if ((action == T5_ACTION_CONFIRM ||
+         action == T5_ACTION_REJECT ||
+         action == T5_ACTION_RETRY) &&
+        (object_type != T5_OBJECT_TASK || object_id == 0)) {
+        return -3;
+    }
+    if ((action == T5_ACTION_PAUSE_EXECUTION ||
+         action == T5_ACTION_RESUME_EXECUTION) &&
+        object_type != T5_OBJECT_EXECUTOR) {
+        return -3;
+    }
 
     t5_frame_t frame;
     memset(&frame, 0, sizeof(frame));
@@ -241,10 +294,10 @@ int uart_transport_send_ui_action(uint16_t action, uint8_t object_type,
     }
     frame.seq = next_sequence_locked();
     g_pending_event.active = true;
-    g_pending_event.sequence = frame.seq;
-    g_pending_event.command = frame.cmd;
     g_pending_event.action = action;
     g_pending_event.sent_ms = tal_system_get_millisecond();
+    g_pending_event.retries = 0;
+    g_pending_event.frame = frame;
     tal_mutex_unlock(g_link_mutex);
 
     state_store_set_action(action, true, T5_STATUS_ACCEPTED);
@@ -281,14 +334,9 @@ int uart_transport_send_page_event(uint8_t page_id, uint8_t event,
 
 bool uart_transport_host_online(void)
 {
-    uint32_t now = tal_system_get_millisecond();
-    uint32_t last_activity;
-    tal_mutex_lock(g_link_mutex);
-    last_activity = g_last_activity_ms;
-    tal_mutex_unlock(g_link_mutex);
-    return last_activity != 0 &&
-           (uint32_t)(now - last_activity) <
-               NIGHTSHIFT_HEARTBEAT_TIMEOUT_MS;
+    display_state_t state;
+    state_store_snapshot(&state);
+    return state.opi_online;
 }
 
 uint32_t uart_transport_last_heartbeat_ms(void)
@@ -324,7 +372,9 @@ int uart_transport_init(void)
     frame_stream_init(&g_stream);
     memset(&g_pending_event, 0, sizeof(g_pending_event));
     g_last_heartbeat_ms = 0;
-    g_last_activity_ms = 0;
+    g_hello_grace_started_ms = 0;
+    g_heartbeat_watchdog_active = false;
+    g_waiting_first_heartbeat = false;
     g_out_sequence = 0;
     g_initialized = true;
 
