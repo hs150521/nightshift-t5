@@ -56,7 +56,7 @@
 /* -------------------------------------------------------------------------
  * RX task configuration
  * ---------------------------------------------------------------------- */
-#define NIGHTSHIFT_RX_TASK_STACK    4096
+#define NIGHTSHIFT_RX_TASK_STACK    8192
 #define NIGHTSHIFT_RX_TASK_PRIO     THREAD_PRIO_2
 #define NIGHTSHIFT_RX_TIMEOUT_MS    100
 

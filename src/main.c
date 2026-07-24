@@ -85,9 +85,12 @@ void user_main(void)
     PR_NOTICE("Nightshift T5 started, waiting for OPi connection...");
     uart_debug_puts("[NS] user_main complete\r\n");
 
-    /* Keep main thread alive — deleting it orphans LVGL/UART tasks */
+    /* Keep main thread alive — deleting it orphans LVGL/UART tasks.
+     * Also send a periodic beacon on UART0 so the host can confirm
+     * the firmware is running. */
     for (;;) {
         tal_system_sleep(5000);
+        uart_debug_puts("[NS] alive\r\n");
     }
 }
 

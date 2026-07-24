@@ -221,13 +221,69 @@ static void uart_rx_task(void *arg)
     uint8_t  buf[256];
     uint8_t  frame_buf[NIGHTSHIFT_MAX_WIRE_FRAME];
     uint16_t frame_len = 0;
+    uint32_t loop_count = 0;
+
+    uart_debug_puts("[NS] RX task started\r\n");
 
     for (;;) {
         int n = tal_uart_read(NIGHTSHIFT_UART_PORT,
                               buf, (uint32_t)sizeof(buf));
+        loop_count++;
+
         if (n <= 0) {
+            /* Log every 100 empty loops so we know the task is alive */
+            if ((loop_count % 100) == 1) {
+                char msg[48];
+                int pos = 0;
+                const char *pfx = "[NS] RX loop ";
+                while (*pfx && pos < 40) msg[pos++] = *pfx++;
+                /* simple decimal of loop_count */
+                uint32_t v = loop_count;
+                char tmp[10];
+                int ti = 0;
+                if (v == 0) { tmp[ti++] = '0'; }
+                else { while (v > 0 && ti < 10) { tmp[ti++] = '0' + (v % 10); v /= 10; } }
+                for (int k = ti - 1; k >= 0; k--) msg[pos++] = tmp[k];
+                const char *sfx = ", n=";
+                while (*sfx && pos < 40) msg[pos++] = *sfx++;
+                if (n < 0) { msg[pos++] = '-'; }
+                else       { msg[pos++] = '0' + n; }
+                msg[pos++] = '\r'; msg[pos++] = '\n'; msg[pos] = 0;
+                uart_debug_puts(msg);
+            }
             tal_system_sleep(NIGHTSHIFT_RX_TIMEOUT_MS);
             continue;
+        }
+
+        /* Log received byte count and hex dump */
+        {
+            char hdr[64];
+            int pos = 0;
+            const char *pfx = "[NS] RX ";
+            while (*pfx && pos < 50) hdr[pos++] = *pfx++;
+            uint32_t v = (uint32_t)n;
+            char tmp[10]; int ti = 0;
+            if (v == 0) { tmp[ti++] = '0'; }
+            else { while (v > 0 && ti < 10) { tmp[ti++] = '0' + (v % 10); v /= 10; } }
+            for (int k = ti - 1; k >= 0; k--) hdr[pos++] = tmp[k];
+            const char *sfx = " bytes: ";
+            while (*sfx && pos < 55) hdr[pos++] = *sfx++;
+            hdr[pos] = 0;
+            uart_debug_puts(hdr);
+
+            /* hex dump (up to 32 bytes) */
+            char hex[128];
+            int hi = 0;
+            int dump = (n > 32) ? 32 : n;
+            for (int i = 0; i < dump; i++) {
+                uint8_t hi_nib = (buf[i] >> 4) & 0x0F;
+                uint8_t lo_nib = buf[i] & 0x0F;
+                hex[hi++] = (hi_nib < 10) ? ('0' + hi_nib) : ('A' + hi_nib - 10);
+                hex[hi++] = (lo_nib < 10) ? ('0' + lo_nib) : ('A' + lo_nib - 10);
+                hex[hi++] = ' ';
+            }
+            hex[hi++] = '\r'; hex[hi++] = '\n'; hex[hi] = 0;
+            uart_debug_puts(hex);
         }
 
         for (int i = 0; i < n; i++) {
@@ -236,12 +292,47 @@ static void uart_rx_task(void *arg)
             if (b == 0x00) {
                 /* End-of-frame delimiter */
                 if (frame_len > 0) {
+                    char fmsg[48];
+                    int fp = 0;
+                    const char *fpfx = "[NS] frame ";
+                    while (*fpfx && fp < 40) fmsg[fp++] = *fpfx++;
+                    uint32_t v = (uint32_t)frame_len;
+                    char tmp[10]; int ti = 0;
+                    if (v == 0) { tmp[ti++] = '0'; }
+                    else { while (v > 0 && ti < 10) { tmp[ti++] = '0' + (v % 10); v /= 10; } }
+                    for (int k = ti - 1; k >= 0; k--) fmsg[fp++] = tmp[k];
+                    fmsg[fp++] = '\r'; fmsg[fp++] = '\n'; fmsg[fp] = 0;
+                    uart_debug_puts(fmsg);
+
                     t5_frame_t decoded;
                     int rc = t5_frame_decode(frame_buf, frame_len, &decoded);
                     if (rc == 0) {
+                        char ok[48];
+                        int op = 0;
+                        const char *opfx = "[NS] cmd=0x";
+                        while (*opfx && op < 40) ok[op++] = *opfx++;
+                        /* cmd hex */
+                        uint16_t cv = decoded.cmd;
+                        char ch[5];
+                        for (int ci = 3; ci >= 0; ci--) {
+                            uint8_t nib = (cv >> (ci * 4)) & 0x0F;
+                            ch[3 - ci] = (nib < 10) ? ('0' + nib) : ('A' + nib - 10);
+                        }
+                        ch[4] = 0;
+                        for (int ci = 0; ci < 4; ci++) ok[op++] = ch[ci];
+                        ok[op++] = '\r'; ok[op++] = '\n'; ok[op] = 0;
+                        uart_debug_puts(ok);
                         process_frame(&decoded);
+                    } else {
+                        char err[32];
+                        int ep = 0;
+                        const char *epfx = "[NS] decode err ";
+                        while (*epfx && ep < 24) err[ep++] = *epfx++;
+                        if (rc < 0) { err[ep++] = '-'; rc = -rc; }
+                        err[ep++] = '0' + rc;
+                        err[ep++] = '\r'; err[ep++] = '\n'; err[ep] = 0;
+                        uart_debug_puts(err);
                     }
-                    /* else: decode error → discard silently */
                     frame_len = 0;
                 }
             } else {
@@ -249,6 +340,7 @@ static void uart_rx_task(void *arg)
                     frame_buf[frame_len++] = b;
                 } else {
                     /* Overflow → discard partial frame and reset */
+                    uart_debug_puts("[NS] frame overflow!\r\n");
                     frame_len = 0;
                 }
             }
@@ -277,7 +369,7 @@ int uart_handler_init(void)
     cfg.base_cfg.stopbits = TUYA_UART_STOP_LEN_1BIT;
     cfg.base_cfg.parity   = TUYA_UART_PARITY_TYPE_NONE;
     cfg.rx_buffer_size    = NIGHTSHIFT_UART_RX_BUF_SIZE;
-    cfg.open_mode         = O_BLOCK;
+    cfg.open_mode         = 0;  /* non-blocking: tal_uart_read returns 0 when no data */
 
     OPERATE_RET ret = tal_uart_init(NIGHTSHIFT_UART_PORT, &cfg);
     if (ret != OPRT_OK) return -1;
@@ -287,6 +379,9 @@ int uart_handler_init(void)
     g_dedup_head        = 0;
     g_last_heartbeat_ms = 0;
     g_out_seq           = 0;
+
+    /* Enable debug output before RX task starts */
+    g_initialised = true;
 
     /* ---- Spawn RX task ---- */
     THREAD_CFG_T thrd;
@@ -299,7 +394,6 @@ int uart_handler_init(void)
                                       uart_rx_task, NULL, &thrd);
     if (ret != OPRT_OK) return -2;
 
-    g_initialised = true;
     return 0;
 }
 
