@@ -6,12 +6,35 @@ Board: **Tuya TUYA_T5AI_BOARD** with **T5AI-BOARD-LCD** (3.5″ 480×320)
 
 ## UART0 — Host Communication (460 800 baud, 8-N-1)
 
-P11 header:
+**UART0 is the only usable UART for host communication.** UART1 (GPIO0/1,
+header Pin 1/Pin 2) is hard-locked by the SDK as the log console
+(`CONFIG_UART_PRINT_PORT=1`; `tkl_uart_init` refuses to init it). UART2's
+alternate pins GPIO40/41 are occupied by the LCD RGB bus.
 
-| Signal | GPIO Pin | Header Pin | Direction |
+| Signal | GPIO Pin | Silkscreen | Direction |
 |--------|----------|------------|----------|
-| TX     | PIN 11 (P11) | P11 Pin 14 | T5 → OPi  |
-| RX     | PIN 10 (P10) | P11 Pin 12 | OPi → T5  |
+| TX     | PIN 11 (GPIO11) | **P11** | T5 → OPi  |
+| RX     | PIN 10 (GPIO10) | **P10** | OPi → T5  |
+
+### DIP switch (4-bit, controls CH342 USB-serial bridging)
+
+| Scenario | P0 | P1 | P10 | P11 |
+|----------|----|----|-----|-----|
+| Normal OPi comms (recommended) | OFF | OFF | **OFF** | **ON** |
+| Flashing firmware | OFF | OFF | ON | ON |
+| PC-side RX injection test (COM7 → GPIO10) | OFF | OFF | ON | ON |
+
+- **P10=ON connects CH342 TX to GPIO10** — must be OFF while the OPi TX is
+  wired, otherwise the two drivers fight on the RX line.
+- **P11=ON connects CH342 RX to GPIO11** — passive tap; safe to keep ON so
+  COM7 can monitor everything the T5 transmits.
+
+### RX path verification (2026-07)
+
+Full stack verified by injecting bytes from the PC via COM7 with P10=ON:
+raw bytes → `[NS] RX n bytes` hex dump → 0x00 delimiter framing → COBS
+decode → CRC-16 check → `cmd=0x1002` dispatch → RESPONSE frame transmitted.
+Use `test_frame.py` to repeat this test.
 
 ---
 
