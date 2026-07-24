@@ -43,6 +43,7 @@ void user_main(void)
     PR_NOTICE("Compile:    %s %s", __DATE__, __TIME__);
 
     /* 2. Register board hardware (LED, button, audio, LCD, touch) */
+    PR_NOTICE("board_register_hardware...");
     OPERATE_RET hw_ret = board_register_hardware();
     if (hw_ret != OPRT_OK) {
         PR_ERR("board_register_hardware failed: %d", hw_ret);
@@ -53,26 +54,41 @@ void user_main(void)
     app_state_register_change_cb(on_state_change);
 
     /* 4. UART transport — starts the RX task */
-    uart_handler_init();
+    int uart_ret = uart_handler_init();
+    uart_debug_puts("\r\n[NS] UART0 init: ");
+    uart_debug_puts(uart_ret == 0 ? "OK\r\n" : "FAIL\r\n");
 
     /* 5. Display driver */
 #if defined(DISPLAY_NAME)
+    uart_debug_puts("[NS] Display init: ");
     lv_vendor_init(DISPLAY_NAME);
+    uart_debug_puts("OK\r\n");
 #else
     PR_WARN("DISPLAY_NAME not defined — skipping display init");
+    uart_debug_puts("[NS] DISPLAY_NAME not defined!\r\n");
 #endif
 
     /* 6. Create UI widgets (must hold the display lock) */
+    uart_debug_puts("[NS] UI init: ");
     lv_vendor_disp_lock();
     ui_manager_init();
     lv_vendor_disp_unlock();
+    uart_debug_puts("OK\r\n");
 
     /* 7. Start LVGL rendering task (priority=3, stack=8KB) */
 #if defined(DISPLAY_NAME)
+    uart_debug_puts("[NS] LVGL render start: ");
     lv_vendor_start(3, 1024 * 8);
+    uart_debug_puts("OK\r\n");
 #endif
 
     PR_NOTICE("Nightshift T5 started, waiting for OPi connection...");
+    uart_debug_puts("[NS] user_main complete\r\n");
+
+    /* Keep main thread alive — deleting it orphans LVGL/UART tasks */
+    for (;;) {
+        tal_system_sleep(5000);
+    }
 }
 
 /* =========================================================================
@@ -86,9 +102,10 @@ static THREAD_HANDLE ty_app_thread = NULL;
 static void tuya_app_thread(void *arg)
 {
     (void)arg;
+    uart_debug_puts("[NS] tuya_app_thread started\r\n");
     user_main();
-    tal_thread_delete(ty_app_thread);
-    ty_app_thread = NULL;
+    uart_debug_puts("[NS] tuya_app_thread: user_main returned\r\n");
+    /* Don't delete ourselves — stay alive so LVGL/UART tasks aren't orphaned */
 }
 
 void tuya_app_main(void)

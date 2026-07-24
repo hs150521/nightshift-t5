@@ -263,10 +263,10 @@ int uart_handler_init(void)
 {
     if (g_initialised) return 0;
 
-    /* ---- Pinmux for UART1 (P11 header: P00=TX, P01=RX) ---- */
-    if (NIGHTSHIFT_UART_PORT == TUYA_UART_NUM_1) {
-        tkl_io_pinmux_config(TUYA_IO_PIN_0, TUYA_UART1_TX);
-        tkl_io_pinmux_config(TUYA_IO_PIN_1, TUYA_UART1_RX);
+    /* ---- Pinmux for UART0 (P11 header: P11=TX, P10=RX) ---- */
+    if (NIGHTSHIFT_UART_PORT == TUYA_UART_NUM_0) {
+        tkl_io_pinmux_config(TUYA_IO_PIN_10, TUYA_UART0_RX);
+        tkl_io_pinmux_config(TUYA_IO_PIN_11, TUYA_UART0_TX);
     }
 
     /* ---- UART peripheral init ---- */
@@ -301,4 +301,16 @@ int uart_handler_init(void)
 
     g_initialised = true;
     return 0;
+}
+
+/* =========================================================================
+ * uart_debug_puts  — write plain text to the protocol UART for diagnostics
+ * ======================================================================= */
+void uart_debug_puts(const char *str)
+{
+    if (!str) return;
+    size_t len = strlen(str);
+    if (len > 0 && g_initialised) {
+        tal_uart_write(NIGHTSHIFT_UART_PORT, (const uint8_t *)str, (uint32_t)len);
+    }
 }

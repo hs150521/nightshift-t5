@@ -11,7 +11,7 @@
 #include "t5_protocol.h"
 
 /**
- * @brief Initialise UART1 at 460800 8N1 and spawn the RX task.
+ * @brief Initialise UART0 at 460800 8N1 and spawn the RX task.
  * @return 0 on success, negative on error.
  */
 int uart_handler_init(void);
@@ -43,5 +43,11 @@ bool uart_is_opi_online(void);
  * @brief Timestamp (ms) of the last received HEARTBEAT.
  */
 uint32_t uart_get_last_heartbeat_ms(void);
+
+/**
+ * @brief Write a plain-text debug string directly to the protocol UART.
+ *        Use this for diagnostics visible on the same COM port as protocol data.
+ */
+void uart_debug_puts(const char *str);
 
 #endif /* UART_HANDLER_H */

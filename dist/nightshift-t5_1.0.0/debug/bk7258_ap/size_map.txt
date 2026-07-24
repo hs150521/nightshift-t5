@@ -463,9 +463,9 @@
    2172	     80	   2156	   1988	    168	     16	     64	   2236	    8bc	tkl_i2c.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
     678	      8	    678	    570	    108	      0	      8	    686	    2ae	tkl_dma2d.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
     366	      0	    366	    366	      0	      0	      0	    366	    16e	tuya_ringbuf.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
-     44	      0	     44	     44	      0	      0	      0	     44	     2c	tuya_list.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
+     34	      0	     34	     34	      0	      0	      0	     34	     22	tuya_list.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
       0	      4	      0	      0	      0	      0	      4	      4	      4	tkl_cellular.c.obj (ex armino/tuyaos_adapter/libtuyaos_adapter.a)
-  16420	   1943	  15687	  12728	   2959	    733	   1210	  17630	   44de	armino/tuyaos_adapter/libtuyaos_adapter.a
+  16410	   1943	  15677	  12718	   2959	    733	   1210	  17620	   44d4	armino/tuyaos_adapter/libtuyaos_adapter.a
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
     729	     65	    729	    660	     69	      0	     65	    794	    31a	bk_netif.c.obj (ex armino/bk_netif/libbk_netif.a)
@@ -526,13 +526,13 @@
   10712	     66	  10712	   7834	   2878	      0	     66	  10778	   2a1a	armino/bk_uvc/libbk_uvc.a
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
-    663	      4	    663	    348	    315	      0	      4	    667	    29b	main.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
-    735	   1357	    735	    724	     11	      0	   1357	   2092	    82c	uart_handler.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
-   1298	     32	   1298	   1094	    204	      0	     32	   1330	    532	ui_manager.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
+    947	      4	    947	    456	    491	      0	      4	    951	    3b7	main.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
+    775	   1357	    775	    764	     11	      0	   1357	   2132	    854	uart_handler.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
+   1146	     28	   1146	    958	    188	      0	     28	   1174	    496	ui_manager.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
     528	    176	    528	    528	      0	      0	    176	    704	    2c0	app_state.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
     460	      0	    460	    460	      0	      0	      0	    460	    1cc	command_handler.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
    1076	      0	   1076	    564	    512	      0	      0	   1076	    434	t5_protocol.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
-   4760	   1569	   4760	   3718	   1042	      0	   1569	   6329	   18b9	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
+   4932	   1565	   4932	   3730	   1202	      0	   1565	   6497	   1961	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
    3368	      0	   3368	   3328	     40	      0	      0	   3368	    d28	lv_obj.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
@@ -608,15 +608,13 @@
     172	      0	    172	    132	     40	      0	      0	    172	     ac	lv_win.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
      12	      0	     12	     12	      0	      0	      0	     12	      c	lv_port_mem.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     690	     14	    690	    452	    238	      0	     14	    704	    2c0	lv_vendor.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
-   1448	      8	   1440	   1182	    258	      8	      0	   1448	    5a8	tdl_led_manage.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     773	      8	    773	    600	    173	      0	      8	    781	    30d	tal_uart.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
      44	      0	     44	     44	      0	      0	      0	     44	     2c	tal_api.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    1700	     28	   1676	   1464	    212	     24	      4	   1704	    6a8	tal_log.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
-    384	     40	    384	    384	      0	      0	     40	    424	    1a8	tal_sw_timer.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     330	      8	    330	    168	    162	      0	      8	    338	    152	tal_system.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    1807	     16	   1807	   1164	    643	      0	     16	   1823	    71f	tal_thread.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
-    986	     88	    986	    834	    152	      0	     88	   1074	    432	tal_time_serivce.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
-    429	      0	    429	    292	    137	      0	      0	    429	    1ad	tuya_t5ai_board.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
+    842	     72	    842	    690	    152	      0	     72	    914	    392	tal_time_serivce.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
+    353	      0	    353	    220	    133	      0	      0	    353	    161	tuya_t5ai_board.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     317	      0	    317	    180	    137	      0	      0	    317	    13d	tuya_t5ai_ex_module.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    1648	      0	   1648	   1648	      0	      0	      0	   1648	    670	lv_group.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    1240	      0	   1240	   1240	      0	      0	      0	   1240	    4d8	lv_draw_arc.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
@@ -656,7 +654,6 @@
     669	      8	    669	    532	    137	      0	      8	    677	    2a5	tdd_tp_gt1151.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     447	      0	    447	    314	    133	      0	      0	    447	    1bf	tdd_tp_i2c.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     845	      0	    845	    522	    323	      0	      0	    845	    34d	tdd_button_gpio.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
-    329	      0	    329	    206	    123	      0	      0	    329	    149	tdd_led_gpio.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    1012	     20	   1012	    782	    230	      0	     20	   1032	    408	tal_dma2d.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
     492	      0	    492	    492	      0	      0	      0	    492	    1ec	lv_draw_sw_blend.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
    8968	      0	   8968	   8968	      0	      0	      0	   8968	   2308	lv_draw_sw_blend_to_argb8888.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
@@ -670,7 +667,7 @@
   14901	      0	  14901	      0	  14901	      0	      0	  14901	   3a35	lv_font_montserrat_14.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
   17159	      0	  17159	      0	  17159	      0	      0	  17159	   4307	lv_font_montserrat_16.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
   38553	      0	  38553	      0	  38553	      0	      0	  38553	   9699	lv_font_montserrat_28.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)
- 319602	    966	 319322	 224268	  95054	    280	    686	 320288	  4e320	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a
+ 317221	    902	 316949	 222280	  94669	    272	    630	 317851	  4d99b	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
     910	     17	    910	    626	    284	      0	     17	    927	    39f	rwble_hl.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libbluetooth_host_ble_ap.a)

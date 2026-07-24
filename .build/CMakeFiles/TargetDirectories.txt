@@ -61,7 +61,6 @@ C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripher
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/button/CMakeFiles/button.dir
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/button/CMakeFiles/edit_cache.dir
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/button/CMakeFiles/rebuild_cache.dir
-C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/led/CMakeFiles/led.dir
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/led/CMakeFiles/edit_cache.dir
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/led/CMakeFiles/rebuild_cache.dir
 C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/src/peripherals/joystick/CMakeFiles/edit_cache.dir

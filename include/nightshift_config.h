@@ -11,7 +11,7 @@
 /* -------------------------------------------------------------------------
  * UART configuration
  * ---------------------------------------------------------------------- */
-#define NIGHTSHIFT_UART_PORT        TUYA_UART_NUM_1
+#define NIGHTSHIFT_UART_PORT        TUYA_UART_NUM_0
 #define NIGHTSHIFT_UART_BAUDRATE    460800
 #define NIGHTSHIFT_UART_RX_BUF_SIZE 512
 

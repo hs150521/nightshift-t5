@@ -34,7 +34,7 @@ flash,ram,text,code,rodata,data,bss,dec,hex,filename
 284,0,284,28,256,0,0,284,`11c,armino/avdk_utils/libavdk_utils.a
 66120,26783,39927,28862,11065,26193,590,66710,`10496,armino/multimedia/libmultimedia.a
 4703,433,4307,3246,1061,396,37,4740,`1284,armino/bk_bluetooth/libbk_bluetooth.a
-16420,1943,15687,12728,2959,733,1210,17630,`44de,armino/tuyaos_adapter/libtuyaos_adapter.a
+16410,1943,15677,12718,2959,733,1210,17620,`44d4,armino/tuyaos_adapter/libtuyaos_adapter.a
 729,65,729,660,69,0,65,794,`31a,armino/bk_netif/libbk_netif.a
 4,0,4,4,0,0,0,4,`4,armino/http/libhttp.a
 4,0,4,4,0,0,0,4,`4,armino/bk_common/libbk_common.a
@@ -43,8 +43,8 @@ flash,ram,text,code,rodata,data,bss,dec,hex,filename
 23449,75,23380,14770,8610,69,6,23455,`5b9f,armino/bk_peripheral/libbk_peripheral.a
 6592,14,6592,5392,1200,0,14,6606,`19ce,armino/bk_dvp/libbk_dvp.a
 10712,66,10712,7834,2878,0,66,10778,`2a1a,armino/bk_uvc/libbk_uvc.a
-4760,1569,4760,3718,1042,0,1569,6329,`18b9,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
-319602,966,319322,224268,95054,280,686,320288,`4e320,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a
+4932,1565,4932,3730,1202,0,1565,6497,`1961,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
+317221,902,316949,222280,94669,272,630,317851,`4d99b,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a
 104834,18723,104824,91400,13424,10,18713,123547,`1e29b,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libbluetooth_host_ble_ap.a
 20,4,20,20,0,0,4,24,`18,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libaudio_osi.a
 32,4,32,32,0,0,4,36,`24,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libvideo_osi.a

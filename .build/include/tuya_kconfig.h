@@ -274,9 +274,7 @@ extern "C" {
 #define ENABLE_BUTTON 1
 #define BUTTION_STACK_SIZE 2048
 // CONFIG_ENABLE_BUTTON_2 is not set
-#define ENABLE_LED 1
-#define LED_NAME "led"
-// CONFIG_ENABLE_LED_2 is not set
+// CONFIG_ENABLE_LED is not set
 #define ENABLE_AUDIO_CODECS 1
 #define AUDIO_CODECS_NUM 1
 #define ENABLE_AUDIO_AEC 1
