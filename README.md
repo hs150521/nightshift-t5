@@ -17,15 +17,17 @@ Communication uses **T5-Link v1** — a lightweight binary protocol over UART
 | LCD module | T5AI-BOARD-LCD — 3.5″ 480×320 RGB565, ILI9488 driver, GT1151 capacitive touch |
 | Host | Orange Pi (any model with a free UART) |
 
-### Wiring (OPi ↔ T5)
+### Wiring (OPi ↔ T5) — verified working 2026-07
 
 | OPi pin | T5 pin | Signal |
 |---------|--------|--------|
-| Pin 27 (UART3 TX) | P11 Pin 12 (P10, UART0 RX) | OPi → T5 data |
-| Pin 28 (UART3 RX) | P11 Pin 14 (P11, UART0 TX) | T5 → OPi data |
+| Pin 28 (UART3 TX) | P11 header Pin 1 (silkscreen **P10**, GPIO10, UART0 RX) | OPi → T5 data |
+| Pin 27 (UART3 RX) | P11 header Pin 2 (silkscreen **P11**, GPIO11, UART0 TX) | T5 → OPi data |
 | GND | GND | Common ground |
 
 > Only three wires are needed. No flow-control lines required.
+> DIP switch: **P10=OFF** (mandatory — P10=ON bridges the CH342 USB TX onto
+> GPIO10 and fights the OPi TX), P11=ON (lets COM7 monitor T5 output), P0/P1=OFF.
 
 ---
 

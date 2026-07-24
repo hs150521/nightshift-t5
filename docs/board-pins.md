@@ -7,14 +7,25 @@ Board: **Tuya TUYA_T5AI_BOARD** with **T5AI-BOARD-LCD** (3.5″ 480×320)
 ## UART0 — Host Communication (460 800 baud, 8-N-1)
 
 **UART0 is the only usable UART for host communication.** UART1 (GPIO0/1,
-header Pin 1/Pin 2) is hard-locked by the SDK as the log console
+silkscreen P0/P1) is hard-locked by the SDK as the log console
 (`CONFIG_UART_PRINT_PORT=1`; `tkl_uart_init` refuses to init it). UART2's
 alternate pins GPIO40/41 are occupied by the LCD RGB bus.
 
-| Signal | GPIO Pin | Silkscreen | Direction |
-|--------|----------|------------|----------|
-| TX     | PIN 11 (GPIO11) | **P11** | T5 → OPi  |
-| RX     | PIN 10 (GPIO10) | **P10** | OPi → T5  |
+| Signal | GPIO Pin | Silkscreen | Header location | Direction |
+|--------|----------|------------|-----------------|----------|
+| RX     | PIN 10 (GPIO10) | **P10** | P11 header **Pin 1** | OPi → T5  |
+| TX     | PIN 11 (GPIO11) | **P11** | P11 header **Pin 2** | T5 → OPi  |
+
+> Verified by hardware loopback (jumper across header Pin 1/Pin 2) and live
+> OPi traffic: silkscreen P10/P11 sit at **Pin 1 and Pin 2 of the P11 header**.
+
+### OPi ↔ T5 wiring (verified working)
+
+| OPi pin | T5 pin |
+|---------|--------|
+| Pin 28 (UART3 TX) | P11 header Pin 1 (P10, UART0 RX) |
+| Pin 27 (UART3 RX) | P11 header Pin 2 (P11, UART0 TX) |
+| GND | GND |
 
 ### DIP switch (4-bit, controls CH342 USB-serial bridging)
 
