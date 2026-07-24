@@ -355,7 +355,7 @@ int uart_handler_init(void)
 {
     if (g_initialised) return 0;
 
-    /* ---- Pinmux for UART0 (P11 header: P11=TX, P10=RX) ---- */
+    /* ---- Pinmux for UART0 (P11 header: P10=RX, P11=TX) ---- */
     if (NIGHTSHIFT_UART_PORT == TUYA_UART_NUM_0) {
         tkl_io_pinmux_config(TUYA_IO_PIN_10, TUYA_UART0_RX);
         tkl_io_pinmux_config(TUYA_IO_PIN_11, TUYA_UART0_TX);
