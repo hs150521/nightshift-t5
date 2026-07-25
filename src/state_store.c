@@ -377,7 +377,12 @@ state_store_result_t state_store_show_notice(uint32_t revision,
     if (result == STATE_STORE_OK) {
         display_state_t *state = write_state_locked();
         state->revision = revision;
-        state->notice.active = true;
+        /*
+         * NOTICE_SHOW with notice_id == 0 is the snapshot representation
+         * for no active notice.  Full sync staging begins from the committed
+         * state, so this explicit value must clear any previously shown notice.
+         */
+        state->notice.active = notice_id != 0;
         state->notice.notice_id = notice_id;
         state->notice.severity = severity;
         state->notice.flags = flags;
