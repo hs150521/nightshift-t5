@@ -31,6 +31,11 @@
 #define NIGHTSHIFT_HEARTBEAT_INTERVAL_MS  2000
 #define NIGHTSHIFT_HEARTBEAT_TIMEOUT_MS   6000   /* 3 missed beats */
 
+/* Panel-initiated HELLO: 1s, 2s, 4s bounded ACK waits, then low-rate probe. */
+#define NIGHTSHIFT_HELLO_ACK_TIMEOUT_MS    1000
+#define NIGHTSHIFT_HELLO_MAX_RETRIES       2
+#define NIGHTSHIFT_HELLO_OFFLINE_RETRY_MS 10000
+
 /* -------------------------------------------------------------------------
  * Dedup cache
  * ---------------------------------------------------------------------- */
@@ -80,10 +85,10 @@
 /* -------------------------------------------------------------------------
  * RX task configuration
  * ---------------------------------------------------------------------- */
-#define NIGHTSHIFT_RX_TASK_STACK    8192
+#define NIGHTSHIFT_RX_TASK_STACK    12288
 #define NIGHTSHIFT_RX_TASK_PRIO     THREAD_PRIO_2
 #define NIGHTSHIFT_RX_TIMEOUT_MS    10
-#define NIGHTSHIFT_WATCHDOG_STACK   3072
+#define NIGHTSHIFT_WATCHDOG_STACK   6144
 #define NIGHTSHIFT_WATCHDOG_PRIO    THREAD_PRIO_1
 #define NIGHTSHIFT_WATCHDOG_POLL_MS 250
 

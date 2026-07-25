@@ -67,6 +67,10 @@ troubleshooting instructions are in [docs/build-flash.md](docs/build-flash.md).
 
 - Atomic `STATE_SYNC_BEGIN` / `STATE_SYNC_END` staging with coherent commit.
 - Revision guards and 32-entry duplicate request replay.
+- Per-boot T5 identity with panel-initiated HELLO discovery and bounded,
+  byte-identical retries.
+- OPI `boot_id` session tracking clears stale dedup/action/sync state when
+  only the host process restarts.
 - Mode, work state, progress, dashboard, attention, notices, and task list.
 - Confirm, reject, retry, pause, resume, dismiss, open-task, and page events.
 - Full-screen host-offline overlay and disabled side-effect controls after 6 s.

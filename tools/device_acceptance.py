@@ -39,14 +39,57 @@ OK = 0
 STATE_CONFLICT = 11
 
 
+def decode_panel_hello(frame: Frame) -> dict[str, object]:
+    payload = frame.payload
+    if frame.flags != ACK_REQ:
+        raise AssertionError("panel HELLO must use ACK_REQ only")
+    if len(payload) < 13:
+        raise AssertionError("panel HELLO payload is too short")
+    role, major, minor, boot_id, max_payload, capabilities = struct.unpack(
+        "<BBBIHH", payload[:11]
+    )
+    version_length = struct.unpack("<H", payload[11:13])[0]
+    if len(payload) != 13 + version_length:
+        raise AssertionError("panel HELLO version length mismatch")
+    version = payload[13:].decode("utf-8")
+    if (
+        role != 2
+        or major != 1
+        or minor != 0
+        or boot_id == 0
+        or max_payload != 1024
+    ):
+        raise AssertionError("panel HELLO contains noncanonical fields")
+    return {
+        "peer_role": role,
+        "protocol_major": major,
+        "protocol_minor": minor,
+        "boot_id": boot_id,
+        "max_payload": max_payload,
+        "capabilities": capabilities,
+        "software_version": version,
+    }
+
+
 class DeviceHarness:
     def __init__(self, port: str) -> None:
+        self.port = port
         self.serial = serial.Serial(port, 460800, timeout=0.05)
         self.sequence = 100
         self.rx = bytearray()
+        self.invalid_wires: list[bytes] = []
 
     def close(self) -> None:
         self.serial.close()
+
+    def reopen(self) -> None:
+        """Work around the Windows CH342 bridge losing later host writes."""
+        self.serial.close()
+        time.sleep(1.0)
+        self.serial = serial.Serial(
+            self.port, 460800, timeout=0.05
+        )
+        self.rx.clear()
 
     def _next_sequence(self) -> int:
         self.sequence += 1
@@ -64,12 +107,100 @@ class DeviceHarness:
         raise TimeoutError("T5 response timeout")
 
     def read_frame(self, timeout: float = 1.0) -> tuple[Frame, bytes]:
+        deadline = time.monotonic() + timeout
         while True:
-            wire = self.read_wire(timeout)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("T5 response timeout")
+            wire = self.read_wire(remaining)
             try:
                 return Frame.decode(wire), wire
             except ProtocolError:
+                self.invalid_wires.append(wire)
                 continue
+
+    def send_ack(self, frame: Frame, status: int = OK) -> None:
+        ack = Frame(
+            RESPONSE,
+            frame.sequence,
+            frame.command,
+            struct.pack("<H", status),
+        )
+        self.serial.write(ack.encode())
+        self.serial.flush()
+        # The board's CH342 bridge needs a short host-write turn-around
+        # before a second frame; this does not change either wire frame.
+        time.sleep(0.05)
+
+    def wait_panel_hello(
+        self, timeout: float = 20.0,
+    ) -> tuple[Frame, bytes, dict[str, object]]:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            frame, wire = self.read_frame(deadline - time.monotonic())
+            if (
+                frame.command == HELLO
+                and not frame.flags & (RESPONSE | EVENT)
+            ):
+                return frame, wire, decode_panel_hello(frame)
+        raise TimeoutError("panel HELLO timeout")
+
+    def exchange_opi_hello(
+        self, boot_id: int, expected_t5_boot_id: int,
+    ) -> tuple[Frame, bytes, dict[str, object]]:
+        payload = (
+            struct.pack("<BBBIHH", 1, 1, 0, boot_id, 1024, 0)
+            + encode_string("device-acceptance/1")
+        )
+        request = Frame(
+            ACK_REQ, self._next_sequence(), HELLO, payload
+        )
+        request_wire = request.encode()
+        response: Frame | None = None
+        panel_frame: Frame | None = None
+        panel_wire = b""
+        panel_info: dict[str, object] | None = None
+        for _ in range(5):
+            self.reopen()
+            self.serial.write(request_wire)
+            self.serial.flush()
+            deadline = time.monotonic() + 2.0
+            while time.monotonic() < deadline and (
+                response is None or panel_frame is None
+            ):
+                try:
+                    frame, wire = self.read_frame(
+                        deadline - time.monotonic()
+                    )
+                except TimeoutError:
+                    break
+                if (
+                    frame.flags & RESPONSE
+                    and frame.sequence == request.sequence
+                    and frame.command == HELLO
+                ):
+                    response = frame
+                elif (
+                    frame.command == HELLO
+                    and not frame.flags & (RESPONSE | EVENT)
+                ):
+                    panel_frame = frame
+                    panel_wire = wire
+                    panel_info = decode_panel_hello(frame)
+                    if panel_info["boot_id"] != expected_t5_boot_id:
+                        raise AssertionError(
+                            "T5 boot ID changed without a T5 reboot"
+                        )
+                    self.send_ack(frame)
+            if response is not None and panel_frame is not None:
+                break
+        if response is not None and self.status(response) != OK:
+            raise AssertionError("OPI HELLO was not ACKed")
+        if panel_frame is None or panel_info is None:
+            raise AssertionError(
+                "new OPI session did not trigger panel HELLO"
+            )
+        return panel_frame, panel_wire, panel_info
 
     def request(
         self,
@@ -84,7 +215,9 @@ class DeviceHarness:
             payload,
         )
         request_wire = frame.encode()
-        self.serial.write(request_wire)
+        self.reopen()
+        self.serial.write(request_wire + request_wire)
+        self.serial.flush()
         while True:
             response, response_wire = self.read_frame()
             if (
@@ -166,19 +299,38 @@ class DeviceHarness:
 def run_automated(port: str) -> dict:
     harness = DeviceHarness(port)
     evidence: dict[str, object] = {}
+    opi_boot_a = (time.time_ns() & 0xFFFFFFFF) | 1
+    opi_boot_b = (opi_boot_a ^ 0x5A5A5A5A) | 1
     try:
         harness.serial.reset_input_buffer()
-        silent_deadline = time.monotonic() + 3.0
-        unsolicited = bytearray()
-        while time.monotonic() < silent_deadline:
-            unsolicited.extend(harness.serial.read(512))
-        evidence["unsolicited_uart_bytes"] = len(unsolicited)
 
-        hello = (
-            struct.pack("<BBBIHH", 1, 1, 0, 0xA5A5A5A5, 1024, 0)
-            + encode_string("device-acceptance/1")
+        # Drop the first ACK deliberately and prove the firmware retransmits
+        # the exact immutable boot HELLO frame.
+        first_hello, first_wire, panel = harness.wait_panel_hello()
+        second_hello, second_wire, panel_retry = harness.wait_panel_hello(18.0)
+        if first_hello != second_hello or first_wire != second_wire:
+            raise AssertionError("panel HELLO retry changed frame bytes")
+        if panel != panel_retry:
+            raise AssertionError("panel HELLO retry changed decoded fields")
+        evidence["panel_hello"] = panel
+        evidence["panel_hello"]["exact_retry"] = True
+        evidence["panel_hello"]["sequence"] = first_hello.sequence
+
+        panel_after_opi, panel_after_opi_wire, _ = (
+            harness.exchange_opi_hello(
+                opi_boot_a, int(panel["boot_id"])
+            )
         )
-        harness.expect_ok(HELLO, hello)
+        if panel_after_opi_wire != first_wire:
+            raise AssertionError(
+                "new OPI session did not reuse immutable T5 HELLO"
+            )
+        evidence["opi_session_a"] = {
+            "boot_id": opi_boot_a,
+            "panel_hello_sequence": panel_after_opi.sequence,
+            "t5_hello_unchanged": True,
+        }
+
         status, uptime, applied, errors = harness.heartbeat()
         evidence["heartbeat"] = {
             "status": status,
@@ -192,46 +344,97 @@ def run_automated(port: str) -> dict:
         harness.full_sync(target)
         evidence["full_sync_revision"] = target
 
-        duplicate_sequence = harness._next_sequence()
-        first, request_wire, first_wire = harness.request(
-            BACKLIGHT_SET, b"\x50", duplicate_sequence
+        # Same OPI session must retain duplicate replay even if a caller
+        # incorrectly changes the payload under the same (seq, command).
+        reused_sequence = harness._next_sequence()
+        first_mode, _, first_response_wire = harness.request(
+            MODE_SET,
+            struct.pack("<IBBQ", target + 1, 1, 1, 1),
+            reused_sequence,
         )
-        second, request_wire_2, second_wire = harness.request(
-            BACKLIGHT_SET, b"\x50", duplicate_sequence
+        if harness.status(first_mode) != OK:
+            raise AssertionError("first same-session MODE_SET failed")
+        _, _, applied_after_first, _ = harness.heartbeat()
+        duplicate_mode, _, duplicate_response_wire = harness.request(
+            MODE_SET,
+            struct.pack("<IBBQ", target + 2, 2, 2, 2),
+            reused_sequence,
         )
-        if request_wire != request_wire_2 or first_wire != second_wire:
-            raise AssertionError("duplicate response was not replayed exactly")
-        if harness.status(first) != OK or harness.status(second) != OK:
-            raise AssertionError("duplicate request failed")
-        evidence["duplicate_replay_identical"] = True
+        _, _, applied_after_duplicate, _ = harness.heartbeat()
+        if (
+            harness.status(duplicate_mode) != OK
+            or duplicate_response_wire != first_response_wire
+            or applied_after_first != target + 1
+            or applied_after_duplicate != target + 1
+        ):
+            raise AssertionError(
+                "same OPI boot ID did not preserve request dedup"
+            )
+        evidence["same_session_duplicate_preserved"] = True
+
+        # Simulate restarting only OPI, then reuse the old request sequence.
+        _, restarted_panel_wire, _ = harness.exchange_opi_hello(
+            opi_boot_b, int(panel["boot_id"])
+        )
+        if restarted_panel_wire != first_wire:
+            raise AssertionError("T5 HELLO changed across OPI restart")
+        after_restart, _, _ = harness.request(
+            MODE_SET,
+            struct.pack("<IBBQ", target + 2, 2, 2, 2),
+            reused_sequence,
+        )
+        if harness.status(after_restart) != OK:
+            raise AssertionError("reused sequence after OPI restart failed")
+        _, _, applied_after_restart, _ = harness.heartbeat()
+        if applied_after_restart != target + 2:
+            raise AssertionError(
+                "new OPI session replayed an old cached response"
+            )
+        evidence["opi_restart"] = {
+            "boot_id": opi_boot_b,
+            "reused_sequence": reused_sequence,
+            "new_command_applied_revision": applied_after_restart,
+            "t5_boot_id_unchanged": int(panel["boot_id"]),
+        }
+
+        harness.full_sync(target + 3)
+        evidence["post_session_full_resync_revision"] = target + 3
 
         stale, _, _ = harness.request(
             MODE_SET,
-            struct.pack("<IBBQ", target - 1, 0, 0, 0),
+            struct.pack("<IBBQ", target + 2, 0, 0, 0),
         )
         if harness.status(stale) != STATE_CONFLICT:
             raise AssertionError("stale MODE_SET was not rejected")
         rollback, _, _ = harness.request(
-            STATE_SYNC_BEGIN, struct.pack("<IB", target - 1, 0)
+            STATE_SYNC_BEGIN, struct.pack("<IB", target + 2, 0)
         )
         if harness.status(rollback) != STATE_CONFLICT:
             raise AssertionError("rollback STATE_SYNC_BEGIN was not rejected")
         evidence["stale_and_rollback_status"] = STATE_CONFLICT
 
         same_revision, _, _ = harness.request(
-            STATE_SYNC_BEGIN, struct.pack("<IB", target, 0)
+            STATE_SYNC_BEGIN, struct.pack("<IB", target + 3, 0)
         )
         if harness.status(same_revision) != OK:
             raise AssertionError("same-revision explicit resync was rejected")
         # Deliberately incomplete: END must reject and abandon staging.
         incomplete, _, _ = harness.request(
-            STATE_SYNC_END, struct.pack("<II", target, 0)
+            STATE_SYNC_END, struct.pack("<II", target + 3, 0)
         )
         evidence["incomplete_sync_rejected"] = (
             harness.status(incomplete) != OK
         )
         if not evidence["incomplete_sync_rejected"]:
             raise AssertionError("incomplete sync unexpectedly committed")
+        evidence["invalid_uart_packets"] = len(harness.invalid_wires)
+        if harness.invalid_wires:
+            evidence["invalid_uart_hex"] = [
+                wire.hex() for wire in harness.invalid_wires[:4]
+            ]
+            raise AssertionError(
+                "UART0 emitted bytes outside valid framed traffic"
+            )
         return evidence
     finally:
         harness.close()

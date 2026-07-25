@@ -5,6 +5,7 @@
 
 #include "command_router.h"
 
+#include "link_session.h"
 #include "nightshift_config.h"
 #include "state_store.h"
 #include "tal_api.h"
@@ -49,15 +50,8 @@ static bool exact_one_string(const uint8_t *payload, uint16_t length,
 
 static uint16_t handle_hello(const uint8_t *p, uint16_t len)
 {
-    char version[64];
-    if (len < 13 ||
-        !exact_one_string(p, len, 11, version, sizeof(version))) {
-        return T5_STATUS_INVALID_LEN;
-    }
-    if (p[1] != T5_PROTO_VERSION) return T5_STATUS_UNSUPPORTED_VER;
-    if (READ_U16_LE(p + 7) == 0) return T5_STATUS_INVALID_ARG;
-    state_store_set_online(true);
-    return T5_STATUS_OK;
+    link_hello_info_t info;
+    return link_session_parse_opi_hello(p, len, &info);
 }
 
 static uint16_t handle_get_info(const uint8_t *p, uint16_t len,

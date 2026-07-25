@@ -88,6 +88,7 @@ void state_store_init(void);
 void state_store_snapshot(display_state_t *out);
 uint32_t state_store_revision(void);
 bool state_store_sync_active(void);
+bool state_store_opi_online(void);
 
 state_store_result_t state_store_sync_begin(uint32_t target_revision,
                                              uint32_t now_ms);

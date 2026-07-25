@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import struct
 import sys
@@ -21,6 +22,16 @@ class CodecTests(unittest.TestCase):
         return json.loads((ROOT / "contracts/uart/golden_vectors.json").read_text())["golden_vectors"]
 
     def test_canonical_golden_vectors(self) -> None:
+        schema_path = ROOT / "contracts/uart/commands.yaml"
+        golden_path = ROOT / "contracts/uart/golden_vectors.json"
+        self.assertEqual(
+            hashlib.sha256(schema_path.read_bytes()).hexdigest(),
+            "32d5b868a8bb05bdb5de09fede8c397f4656c414385316d8e5f5f52bb2ab43c1",
+        )
+        self.assertEqual(
+            hashlib.sha256(golden_path.read_bytes()).hexdigest(),
+            "2978cb3a722a61e842e7c01758b0ded365b89fa2d14ab5c37de237cd2d233d98",
+        )
         for vector in self.vectors():
             with self.subTest(vector=vector["name"]):
                 wire = bytes.fromhex(vector["raw_hex"])

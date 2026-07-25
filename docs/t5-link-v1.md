@@ -81,6 +81,21 @@ The offline watchdog is driven only by valid `HEARTBEAT` requests. A valid
 `HELLO` starts one initial six-second grace window; other commands do not move
 the deadline. A valid heartbeat recovers the link and permits a full resync.
 
+## Boot sessions and HELLO discovery
+
+Each T5 boot generates one random, nonzero `t5_boot_id`. UART0 initialization
+builds and sends one canonical panel HELLO (`peer_role=2`, `ACK_REQ`) containing
+that ID, the frozen protocol version, maximum payload, actual capabilities, and
+firmware version. The frame is immutable for the boot: ACK retries and
+low-rate offline discovery reuse its sequence and exact payload.
+
+Incoming OPI HELLO uses `peer_role=1` and is strictly decoded before the
+request cache is consulted. A first or changed nonzero OPI `boot_id` clears
+old duplicate responses, cancels a pending UI action, abandons incomplete
+snapshot state, resets heartbeat liveness, and causes the panel HELLO to be
+sent again after the OPI HELLO response. A same-session HELLO preserves the
+request cache. Invalid HELLO payloads do not alter session or online state.
+
 Object types are: 0 none, 1 task, 2 notice, 3 executor, 4 panel. Action 13 is
 the optional `REQUEST_RESYNC` extension; actions 1–12 retain the Orange Pi
 contract values.

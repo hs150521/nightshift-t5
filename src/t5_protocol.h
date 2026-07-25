@@ -52,6 +52,10 @@
 #define T5_PROTO_VERSION      0x01
 #define T5_PROTO_MINOR        0x00
 
+/* Canonical HELLO peer roles. */
+#define T5_PEER_ROLE_OPI      0x01
+#define T5_PEER_ROLE_PANEL    0x02
+
 /* =========================================================================
  * Command IDs
  * ======================================================================= */

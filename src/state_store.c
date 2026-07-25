@@ -151,6 +151,15 @@ bool state_store_sync_active(void)
     return active;
 }
 
+bool state_store_opi_online(void)
+{
+    bool online;
+    tal_mutex_lock(g_mutex);
+    online = g_committed.opi_online;
+    tal_mutex_unlock(g_mutex);
+    return online;
+}
+
 state_store_result_t state_store_sync_begin(uint32_t target_revision,
                                              uint32_t now_ms)
 {

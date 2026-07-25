@@ -17,6 +17,7 @@ set(APP_SRC
     ${APP_PATH}/src/t5_protocol.c
     ${APP_PATH}/src/frame_stream.c
     ${APP_PATH}/src/request_cache.c
+    ${APP_PATH}/src/link_session.c
     ${APP_PATH}/src/state_store.c
     ${APP_PATH}/src/command_router.c
     ${APP_PATH}/src/uart_transport.c
