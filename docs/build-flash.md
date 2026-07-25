@@ -25,7 +25,9 @@ $env:Path=(Resolve-Path '../TuyaOpen/.venv/Scripts').Path + ';' + $env:Path
 Output images are under `.build/bin/`. TuyaOpen's Windows T5 platform also
 requires GNU `make` inside its bundled bash environment. If the application
 library compiles but platform packaging reports `make: command not found`,
-repair/install that SDK prerequisite before treating the build as complete.
+run `tos.py prepare`, then include
+`../TuyaOpen/.tools/make/4.4.1` in `PATH` and set `OPEN_SDK_MAKE` to its
+`make.exe` before rebuilding.
 
 ## Detect ports
 
@@ -71,3 +73,17 @@ heartbeat through its UART3 service instead.
 
 Plain ASCII output on UART0 is a firmware/configuration failure. SDK `PR_*`
 logs belong on UART1/mailbox.
+
+## 2026-07-25 hardware record
+
+- Full T5AI build completed successfully and produced
+  `.build/bin/nightshift-t5_QIO_1.0.0.bin`.
+- The Python contract tests passed (15 tests, 21 vector subtests).
+- COM7 was identified as CH342 interface A and the automatic flash tool reached
+  `Handshake OK`, but both 921600 and 460800 attempts timed out during the
+  following handshake sequence.
+- No valid T5-Link frames were observed passively on COM6 or COM7.
+
+The last two items mean the firmware image is ready, but the board still needs
+the physical download/reset sequence before another flash attempt. They are not
+evidence that a new image is running on the panel.

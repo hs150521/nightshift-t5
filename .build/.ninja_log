@@ -13,7 +13,7 @@
 28570	34710	8065816081358731	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/nxp/vglite/lv_vglite_buf.c.obj	18b0377a1611dfd9
 14051	23723	8065815968576594	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/lv_draw_image.c.obj	1ebac5c793e58d35
 101075	105800	8065816791601621	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/others/snapshot/lv_snapshot.c.obj	a786232d6ac4d931
-86	585	8066503512435740	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/t5_protocol.c.obj	fa2a3b91d491848f
+84	630	8066514798864230	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/t5_protocol.c.obj	fa2a3b91d491848f
 24309	31192	8065816043215385	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/nxp/pxp/lv_pxp_cfg.c.obj	694fc433ea2944fa
 199810	201112	8065817751017989	src/tuya_cloud_service/CMakeFiles/tuya_cloud_service.dir/transport/tls_transporter.c.obj	bd87c552c6439047
 60269	66955	8065816398273887	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/font/lv_font_montserrat_42.c.obj	ef383de11db5461d
@@ -39,7 +39,7 @@
 114	783	8066181843342648	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/uart_handler.c.obj	ff9edc8dbc16e11
 138533	143402	8065817168802749	src/libtls/CMakeFiles/libtls.dir/mbedtls-3.1.0/library/poly1305.c.obj	ab4f0286d59a50c7
 4789	10829	8065815843253283	src/libhttp/CMakeFiles/libhttp.dir/src/http_captive.c.obj	5d58d865390a941c
-183	574	8066503512329153	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/link_session.c.obj	b0667de840a4be24
+123	718	8066514800247237	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/link_session.c.obj	b0667de840a4be24
 2075	15563	8065815876743740	src/libhttp/CMakeFiles/libhttp.dir/src/http_session.c.obj	7e0985716eb9b751
 128482	132395	8065817061442588	src/libtls/CMakeFiles/libtls.dir/mbedtls-3.1.0/library/cmac.c.obj	c18f91072d022bd2
 10829	17024	8065815909279766	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/core/lv_obj_style_gen.c.obj	ebeed0b51925f5e1
@@ -59,7 +59,7 @@
 1467	16273	8065815890986578	src/libcjson/CMakeFiles/libcjson.dir/cJSON/cJSON.c.obj	a20891420478abf0
 182669	189312	8065817618348555	src/tal_cellular/CMakeFiles/tal_cellular.dir/src/tal_cellular.c.obj	a08e75e2eeda2aa3
 15948	24041	8065815972087448	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/lv_draw_mask.c.obj	650dd33489daeb35
-170	469	8066503511355828	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/request_cache.c.obj	a2a4eaf2e460ac4a
+109	633	8066514799561363	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/request_cache.c.obj	a2a4eaf2e460ac4a
 177437	183861	8065817574967856	src/tal_bluetooth/CMakeFiles/tal_bluetooth.dir/nimble/host/ble_sm_cmd.c.obj	f3a3cb5f34813c42
 10338	16296	8065815894982185	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/core/lv_obj_property.c.obj	4327bdc446ab3143
 11103	19275	8065815927431286	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/core/lv_obj_tree.c.obj	ad3edd3d110f49a8
@@ -97,7 +97,7 @@
 90159	97054	8065816692184583	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/misc/lv_log.c.obj	520a90aad1d4ab26
 16275	26980	8065815986480990	lib/liblibcjson.a	4f8dfb0f05a552ba
 96234	102453	8065816740141446	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/osal/lv_freertos.c.obj	c31877da814724b0
-158	466	8066503511085849	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/frame_stream.c.obj	a4e0da13f34b2a60
+97	634	8066514799331524	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/frame_stream.c.obj	a4e0da13f34b2a60
 197389	199274	8065817731514890	src/tuya_cloud_service/CMakeFiles/tuya_cloud_service.dir/cloud/mqtt_service.c.obj	26281c72f45ee6b5
 25499	32004	8065816047513758	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/nxp/vglite/lv_draw_vglite_fill.c.obj	11cae4537dfb8768
 57543	62303	8065816357157843	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/font/lv_font_montserrat_20.c.obj	3322ae22bfc8aba8
@@ -190,7 +190,7 @@
 196888	197996	8065817720206915	lib/libtal_wifi.a	25b5b83bfad1b9a
 44522	49946	8065816230216703	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/vg_lite/lv_draw_vg_lite_label.c.obj	e5a7a92b459fde1f
 99572	111350	8065816835248966	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/others/ime/lv_ime_pinyin.c.obj	aa6ea0f6dbcb250a
-72	752	8066503514159510	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/firmware_main.c.obj	51c7916599910ed5
+69	1203	8066514805158841	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/firmware_main.c.obj	51c7916599910ed5
 46061	50079	8065816232754051	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/draw/vg_lite/lv_vg_lite_decoder.c.obj	92c8a5146fa9d01f
 149903	154853	8065817282165249	src/libtls/CMakeFiles/libtls.dir/mbedtls-3.1.0/library/x509_create.c.obj	1dc4f11a09db145d
 178004	184418	8065817580399418	src/tal_bluetooth/CMakeFiles/tal_bluetooth.dir/nimble/host/ble_store_util.c.obj	a09b1e7f534c7527
@@ -338,7 +338,7 @@
 84795	93682	8065816654911198	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/misc/lv_anim.c.obj	ce2d225265e78c67
 82586	94265	8065816654170666	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/libs/tjpgd/tjpgd.c.obj	4c9475e6cd1fcb8d
 85701	94408	8065816656669111	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/misc/lv_area.c.obj	46da09f56c9ea85e
-1096	26539	8066503517701644	build_example_exe	55426697d5d72cb6
+1472	32730	8066514807983552	build_example_exe	55426697d5d72cb6
 115640	119367	8065816933411456	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/widgets/keyboard/lv_keyboard.c.obj	b39af7dfeca21c72
 123270	131774	8065817048752205	src/liblvgl/v9/CMakeFiles/v9.dir/port/lv_vendor.c.obj	bc753b4089875e3d
 168224	172663	8065817461252957	src/tal_bluetooth/CMakeFiles/tal_bluetooth.dir/nimble/host/ble_hs_adv.c.obj	5965ce84c833a312
@@ -524,7 +524,7 @@
 154854	158219	8065817322275534	src/peripherals/display/CMakeFiles/display.dir/tdd_display/src/spi/tdd_disp_spi_st7735s.c.obj	526e6a225970b92a
 153398	158681	8065817327270883	src/peripherals/display/CMakeFiles/display.dir/tdd_display/src/spi/tdd_disp_spi_ili9341.c.obj	d1ce3f20f54f3d9d
 150356	159078	8065817331386040	src/libtls/CMakeFiles/libtls.dir/mbedtls-3.1.0/library/x509_crt.c.obj	e6aa121d6a307361
-197	882	8066503515523648	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/state_store.c.obj	afa8094f0286ac57
+135	1207	8066514805246388	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/state_store.c.obj	afa8094f0286ac57
 155483	160212	8065817331226062	src/peripherals/display/CMakeFiles/display.dir/tdd_display/src/spi/tdd_disp_spi_st7789.c.obj	8db3f730b3660d4e
 156307	160462	8065817339684696	src/peripherals/display/CMakeFiles/display.dir/tdd_display/src/i2c/tdd_disp_ssd1306.c.obj	abd67703b557b203
 151945	160551	8065817341584610	src/peripherals/display/CMakeFiles/display.dir/tdl_display/src/tdl_display_manage.c.obj	8e4ba52214065890
@@ -638,20 +638,10 @@
 714	2594	8065818945248271	lib/libtuya_cloud_service.a	6c093478f61bfdae
 787	3824	8065818957373367	boards/T5AI/TUYA_T5AI_BOARD/CMakeFiles/TUYA_T5AI_BOARD.dir/tuya_t5ai_board.c.obj	619161b778f81d1d
 4316	7863	8065818996885862	lib/libtuyaos.a	12baa6ab79f91d42
-937	1096	8066503517701644	lib/libtuyaapp.a	cac3b882cbaeebe1
-1096	26539	8066503517701644	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
-210	746	8066503514171179	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/command_router.c.obj	f7553b9c76a37bd7
-222	884	8066503515557089	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/uart_transport.c.obj	6f590389194211f2
-236	937	8066503516105201	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/panel_ui.c.obj	a695102303ba9f3c
-84	630	8066514798864230	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/t5_protocol.c.obj	fa2a3b91d491848f
-109	633	8066514799561363	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/request_cache.c.obj	a2a4eaf2e460ac4a
-97	634	8066514799331524	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/frame_stream.c.obj	a4e0da13f34b2a60
-123	718	8066514800247237	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/link_session.c.obj	b0667de840a4be24
+1305	1472	8066514807983552	lib/libtuyaapp.a	cac3b882cbaeebe1
+1472	32730	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
 148	938	8066514802600791	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/command_router.c.obj	f7553b9c76a37bd7
-69	1203	8066514805158841	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/firmware_main.c.obj	51c7916599910ed5
-135	1207	8066514805246388	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/state_store.c.obj	afa8094f0286ac57
 163	1232	8066514805554215	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/uart_transport.c.obj	6f590389194211f2
 257	1305	8066514806284135	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/panel_ui.c.obj	a695102303ba9f3c
-1305	1472	8066514807983552	lib/libtuyaapp.a	cac3b882cbaeebe1
-1472	32730	8066514807983552	build_example_exe	55426697d5d72cb6
-1472	32730	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
+62	33243	8066514807983552	build_example_exe	55426697d5d72cb6
+62	33243	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6

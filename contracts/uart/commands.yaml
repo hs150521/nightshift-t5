@@ -29,6 +29,13 @@ t5_link_v1:
     NO_SPACE: 0x000A
     STATE_CONFLICT: 0x000B
 
+  object_types:
+    NONE: 0
+    TASK: 1
+    NOTICE: 2
+    EXECUTOR: 3
+    PANEL: 4
+
   capabilities:
     LCD: 0x0001
     TOUCH: 0x0002
@@ -67,33 +74,41 @@ t5_link_v1:
     DISMISS_NOTICE: 12
     REQUEST_RESYNC: 13
 
-  object_types:
-    NONE: 0
-    TASK: 1
-    NOTICE: 2
-    EXECUTOR: 3
-    PANEL: 4
+  event_flags:
+    UI_ACTION: 0x05  # EVENT | ACK_REQ
+    PAGE_EVENT: 0x04  # EVENT
 
   commands:
+    # System
     HELLO: 0x0001
     HEARTBEAT: 0x0002
     GET_INFO: 0x0003
     TIME_SYNC: 0x0004
     STATE_SYNC_BEGIN: 0x0010
     STATE_SYNC_END: 0x0011
+
+    # State
     MODE_SET: 0x1001
     ATTENTION_SET: 0x1002
     WORK_STATE_SET: 0x1003
     DASHBOARD_SET: 0x1004
     NOTICE_SHOW: 0x1005
+
+    # Task list
     TASK_LIST_BEGIN: 0x1101
     TASK_ITEM: 0x1102
     TASK_LIST_END: 0x1103
+
+    # User actions
     UI_ACTION: 0x2001
     PAGE_EVENT: 0x2002
     TOUCH_EVENT_DEBUG: 0x2003
+
+    # LED / backlight
     LED_OVERRIDE: 0x3001
     BACKLIGHT_SET: 0x3002
+
+    # Audio (reserved)
     AUDIO_PLAY: 0x4001
     AUDIO_STOP: 0x4002
     VOLUME_SET: 0x4003
@@ -124,6 +139,7 @@ t5_link_v1:
         - { name: error_flags, type: u32 }
 
     GET_INFO:
+      request: []
       response:
         - { name: status, type: u16 }
         - { name: protocol_major, type: u8 }
@@ -220,7 +236,6 @@ t5_link_v1:
         - { name: list_crc32, type: u32 }
 
     UI_ACTION:
-      event_flags: [EVENT, ACK_REQ]
       event:
         - { name: action, type: u16 }
         - { name: object_type, type: u8 }
@@ -229,7 +244,6 @@ t5_link_v1:
         - { name: text, type: string }
 
     PAGE_EVENT:
-      event_flags: [EVENT]
       event:
         - { name: page_id, type: u8 }
         - { name: event, type: u8 }

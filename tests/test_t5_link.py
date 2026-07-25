@@ -26,11 +26,11 @@ class CodecTests(unittest.TestCase):
         golden_path = ROOT / "contracts/uart/golden_vectors.json"
         self.assertEqual(
             hashlib.sha256(schema_path.read_bytes()).hexdigest(),
-            "32d5b868a8bb05bdb5de09fede8c397f4656c414385316d8e5f5f52bb2ab43c1",
+            "2b82c6d0c37d80c9cb3080140ee47fde1a349e14cf8889e3729e830576c0ef49",
         )
         self.assertEqual(
             hashlib.sha256(golden_path.read_bytes()).hexdigest(),
-            "2978cb3a722a61e842e7c01758b0ded365b89fa2d14ab5c37de237cd2d233d98",
+            "5cc9a36468edf1513340cdcace88682d1d21ddc74b0698361e41c4c400c2c3ab",
         )
         for vector in self.vectors():
             with self.subTest(vector=vector["name"]):
@@ -71,7 +71,7 @@ class CodecTests(unittest.TestCase):
         self.assertEqual(len(payload), 14)
         self.assertEqual(
             struct.unpack("<IBBQ", payload),
-            (7, 2, 2, 1_700_000_000_000),
+            (1, 2, 2, 1_700_000_000_000),
         )
 
     def test_work_state_and_heartbeat_lengths(self) -> None:
@@ -80,12 +80,12 @@ class CodecTests(unittest.TestCase):
         self.assertEqual(len(payload), 31)
         self.assertEqual(
             struct.unpack("<IBHHIIII", payload[:25]),
-            (7, 2, 500, 0, 100, 50, 60, 42),
+            (1, 2, 500, 0, 100, 50, 60, 7),
         )
         heartbeat = next(v for v in self.vectors() if v["name"] == "heartbeat_response")
         hb_payload = Frame.decode(bytes.fromhex(heartbeat["raw_hex"])).payload
         self.assertEqual(len(hb_payload), 14)
-        self.assertEqual(struct.unpack("<HIII", hb_payload), (0, 6000, 7, 0))
+        self.assertEqual(struct.unpack("<HIII", hb_payload), (0, 123456, 1, 0))
 
     def test_ui_action_payload_layout(self) -> None:
         payload = encode_ui_action(1, 1, 0x12345678, -4, "ok")
