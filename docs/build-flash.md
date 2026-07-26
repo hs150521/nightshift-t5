@@ -107,3 +107,20 @@ evidence that a new image is running on the panel.
   standby screen and that OPI communication was restored.
 - A COM5 audit showed `nightshift-backend.service` active with zero restarts,
   `/dev/ttyS3` configured at 460800 baud, and the backend holding the UART.
+
+## 2026-07-26 offline-standby fix
+
+- The local standby screen no longer inherits a stale host backlight value.
+  While standby is visible, or whenever the Orange Pi is offline, T5 forces
+  the panel backlight to 100%. Host brightness control remains active only on
+  the online dashboard.
+- The firmware cross-compile completed successfully. Per the show-floor
+  operator's request, the host test suite was not rerun.
+- The QIO image is 3,552,480 bytes with SHA-256
+  `BA0C7B39E1388263F6804E41668545524EA59BC8435E15BD69BDEDF0584A3686`.
+- COM7 flashing at 460800 baud completed successfully, restored flash write
+  protection, and rebooted the device (`Flash OK`, 97.3 seconds).
+- Offline acceptance check: keep the Orange Pi disconnected, set
+  P0=OFF, P1=OFF, P10=OFF, P11=ON, then reset T5. The standby animation must
+  appear; swipe down must reveal the dashboard and swipe up must return to
+  standby.

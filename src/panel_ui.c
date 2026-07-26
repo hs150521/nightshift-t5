@@ -148,12 +148,32 @@ static void update_page_visibility(void)
     }
 }
 
+static void update_backlight(const display_state_t *state)
+{
+    if (!g_display_handle || !state) return;
+
+    /*
+     * Standby is a local, always-available screen. A stale host brightness
+     * command (especially 0%) must not leave the panel black after the OPI
+     * disconnects. Host brightness remains effective only inside the online
+     * dashboard.
+     */
+    uint8_t target = (g_idle_visible || !state->opi_online)
+                         ? 100
+                         : state->backlight_percent;
+    if (g_applied_backlight != target) {
+        tdl_disp_set_brightness(g_display_handle, target);
+        g_applied_backlight = target;
+    }
+}
+
 static void show_idle(bool visible)
 {
     if (g_idle_visible == visible) return;
     g_idle_visible = visible;
     if (visible) lv_gif_restart(g_idle_gif);
     update_page_visibility();
+    update_backlight(&g_visible_state);
 }
 
 static void on_gesture(lv_event_t *event)
@@ -456,12 +476,7 @@ static void update_task_page(const display_state_t *state)
 
 static void update_local_hardware(const display_state_t *state)
 {
-    if (g_display_handle &&
-        g_applied_backlight != state->backlight_percent) {
-        tdl_disp_set_brightness(g_display_handle,
-                                state->backlight_percent);
-        g_applied_backlight = state->backlight_percent;
-    }
+    update_backlight(state);
 #if defined(LED_NAME) && defined(CONFIG_ENABLE_LED) && CONFIG_ENABLE_LED
     if (g_led_handle) {
         if (state->led_override_active) {

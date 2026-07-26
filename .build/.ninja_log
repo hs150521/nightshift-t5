@@ -646,3 +646,5 @@
 119	1217	8067354547341641	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/panel_ui.c.obj	a695102303ba9f3c
 101	1816	8067367142195538	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/nightshift_idle_gif.c.obj	f517120575f9a67a
 1817	2016	8067367144214001	lib/libtuyaapp.a	c2765c60b160a4e5
+111	965	8067375813240034	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/panel_ui.c.obj	a695102303ba9f3c
+967	1180	8067375815370338	lib/libtuyaapp.a	c2765c60b160a4e5
