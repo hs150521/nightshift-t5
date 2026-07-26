@@ -38,10 +38,12 @@ static display_state_t g_visible_state;
 static bool g_pending_dirty;
 static uint16_t g_task_offset;
 static bool g_tasks_visible;
+static bool g_idle_visible;
 
 static lv_obj_t *g_screen;
 static lv_obj_t *g_main_page;
 static lv_obj_t *g_task_page;
+static lv_obj_t *g_idle_gif;
 static lv_obj_t *g_mode_label;
 static lv_obj_t *g_status_label;
 static lv_obj_t *g_task_label;
@@ -66,6 +68,8 @@ static lv_obj_t *g_offline_overlay;
 static lv_obj_t *g_offline_label;
 static TDL_DISP_HANDLE_T g_display_handle;
 static uint8_t g_applied_backlight = 0xFF;
+
+LV_IMAGE_DECLARE(nightshift_idle_gif);
 
 #if defined(LED_NAME) && defined(CONFIG_ENABLE_LED) && CONFIG_ENABLE_LED
 static TDL_LED_HANDLE_T g_led_handle;
@@ -117,6 +121,55 @@ static void send_action(uint16_t action, uint8_t object_type,
     uart_transport_send_ui_action(action, object_type, object_id, 0, "");
 }
 
+static void update_page_visibility(void)
+{
+    if (g_idle_visible) {
+        lv_obj_add_flag(g_main_page, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(g_task_page, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(g_offline_overlay, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(g_idle_gif, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(g_idle_gif);
+        return;
+    }
+
+    lv_obj_add_flag(g_idle_gif, LV_OBJ_FLAG_HIDDEN);
+    if (g_tasks_visible) {
+        lv_obj_add_flag(g_main_page, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(g_task_page, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(g_task_page, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(g_main_page, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (g_visible_state.opi_online) {
+        lv_obj_add_flag(g_offline_overlay, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(g_offline_overlay, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(g_offline_overlay);
+    }
+}
+
+static void show_idle(bool visible)
+{
+    if (g_idle_visible == visible) return;
+    g_idle_visible = visible;
+    if (visible) lv_gif_restart(g_idle_gif);
+    update_page_visibility();
+}
+
+static void on_gesture(lv_event_t *event)
+{
+    (void)event;
+    lv_indev_t *indev = lv_indev_active();
+    if (!indev) return;
+
+    lv_dir_t direction = lv_indev_get_gesture_dir(indev);
+    if (g_idle_visible && direction == LV_DIR_BOTTOM) {
+        show_idle(false);
+    } else if (!g_idle_visible && direction == LV_DIR_TOP) {
+        show_idle(true);
+    }
+}
+
 static void on_confirm(lv_event_t *event)
 {
     (void)event;
@@ -161,15 +214,8 @@ static void on_dismiss(lv_event_t *event)
 static void show_tasks(bool visible)
 {
     g_tasks_visible = visible;
-    if (visible) {
-        lv_obj_add_flag(g_main_page, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(g_task_page, LV_OBJ_FLAG_HIDDEN);
-        uart_transport_send_page_event(1, 1, 0);
-    } else {
-        lv_obj_add_flag(g_task_page, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(g_main_page, LV_OBJ_FLAG_HIDDEN);
-        uart_transport_send_page_event(0, 1, 0);
-    }
+    update_page_visibility();
+    uart_transport_send_page_event(visible ? 1 : 0, 1, 0);
 }
 
 static void on_tasks(lv_event_t *event)
@@ -450,12 +496,7 @@ static void apply_state(const display_state_t *state)
     update_task_page(state);
     update_local_hardware(state);
 
-    if (state->opi_online) {
-        lv_obj_add_flag(g_offline_overlay, LV_OBJ_FLAG_HIDDEN);
-    } else {
-        lv_obj_clear_flag(g_offline_overlay, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_move_foreground(g_offline_overlay);
-    }
+    update_page_visibility();
 }
 
 static void pending_timer(lv_timer_t *timer)
@@ -490,6 +531,7 @@ void panel_ui_init(void)
     g_pending_dirty = false;
     g_task_offset = 0;
     g_tasks_visible = false;
+    g_idle_visible = true;
 
     g_screen = lv_screen_active();
     lv_obj_remove_style_all(g_screen);
@@ -598,6 +640,13 @@ void panel_ui_init(void)
                                   30, 162, 420, LV_TEXT_ALIGN_CENTER);
     lv_label_set_text(detail,
         "Controls are disabled.\nWaiting for UART heartbeat and resync.");
+
+    g_idle_gif = lv_gif_create(g_screen);
+    lv_gif_set_src(g_idle_gif, &nightshift_idle_gif);
+    lv_obj_set_pos(g_idle_gif, 0, 0);
+    lv_obj_add_flag(g_idle_gif, LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_add_event_cb(g_screen, on_gesture, LV_EVENT_GESTURE, NULL);
+    update_page_visibility();
 
 #if defined(DISPLAY_NAME)
     g_display_handle = tdl_disp_find_dev(DISPLAY_NAME);

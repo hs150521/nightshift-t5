@@ -22,6 +22,7 @@ set(APP_SRC
     ${APP_PATH}/src/command_router.c
     ${APP_PATH}/src/uart_transport.c
     ${APP_PATH}/src/panel_ui.c
+    ${APP_PATH}/src/nightshift_idle_gif.c
 )
 
 # APP_INC

@@ -72,6 +72,8 @@ troubleshooting instructions are in [docs/build-flash.md](docs/build-flash.md).
 - OPI `boot_id` session tracking clears stale dedup/action/sync state when
   only the host process restarts.
 - Mode, work state, progress, dashboard, attention, notices, and task list.
+- Silent looping standby animation on boot; swipe down for the panel UI and
+  swipe up to return to standby.
 - Confirm, reject, retry, pause, resume, dismiss, open-task, and page events.
 - Full-screen host-offline overlay and disabled side-effect controls after 6 s.
 - Binary-only protocol UART0; SDK diagnostics stay on UART1/mailbox.

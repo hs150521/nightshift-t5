@@ -87,3 +87,23 @@ logs belong on UART1/mailbox.
 The last two items mean the firmware image is ready, but the board still needs
 the physical download/reset sequence before another flash attempt. They are not
 evidence that a new image is running on the panel.
+
+## 2026-07-26 standby-media build
+
+- The silent 480x320 standby GIF, swipe navigation, and generated LVGL asset
+  compiled successfully.
+- The host suite passed 17 tests before the final show-floor media swap,
+  including deterministic media generation and verification that both renamed
+  MP4 source clips contain no audio track. At the operator's request, the
+  asset-only replacement was built and flashed without rerunning the suite.
+- The final 5.2-second silent standby source produced a 2,163,776-byte AP image
+  within the 3,670,016-byte application region.
+- The final QIO image was 3,552,448 bytes with SHA-256
+  `9BEA7636A20DFF955AF414CBB8832088D3642D9C9F6867E619E71D171ADA8EA0`.
+- COM7 flashing at 460800 baud completed successfully, restored flash write
+  protection, and rebooted the device (`Flash OK`, 97.0 seconds).
+- After flashing, the normal OPI switch state is P0=OFF, P1=OFF, P10=OFF,
+  P11=ON. The show-floor operator confirmed that the display lit with the new
+  standby screen and that OPI communication was restored.
+- A COM5 audit showed `nightshift-backend.service` active with zero restarts,
+  `/dev/ttyS3` configured at 460800 baud, and the backend holding the UART.
