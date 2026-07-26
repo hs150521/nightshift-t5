@@ -527,7 +527,7 @@
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
     534	      4	    534	    282	    252	      0	      4	    538	    21a	firmware_main.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
-   2662	   5036	   2662	   2662	      0	      0	   5036	   7698	   1e12	state_store.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
+   2666	   5036	   2666	   2666	      0	      0	   5036	   7702	   1e16	state_store.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
    2150	   8623	   2150	   2126	     24	      0	   8623	  10773	   2a15	uart_transport.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
    4204	   3860	   4203	   3570	    633	      1	   3859	   8063	   1f7f	panel_ui.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
    1182	      0	   1182	    670	    512	      0	      0	   1182	    49e	t5_protocol.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
@@ -535,7 +535,7 @@
     162	      0	    162	    162	      0	      0	      0	    162	     a2	request_cache.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
     536	      0	    536	    516	     20	      0	      0	    536	    218	link_session.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
    1268	      0	   1268	   1226	     42	      0	      0	   1268	    4f4	command_router.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a)
-  12828	  17523	  12827	  11344	   1483	      1	  17522	  30350	   768e	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
+  12832	  17523	  12831	  11348	   1483	      1	  17522	  30354	   7692	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
 
   flash	    ram	   text	   code	 rodata	   data	    bss	    dec	    hex	filename
    3368	      0	   3368	   3328	     40	      0	      0	   3368	    d28	lv_obj.c.obj (ex C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a)

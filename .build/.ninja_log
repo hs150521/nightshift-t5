@@ -338,7 +338,7 @@
 84795	93682	8065816654911198	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/misc/lv_anim.c.obj	ce2d225265e78c67
 82586	94265	8065816654170666	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/libs/tjpgd/tjpgd.c.obj	4c9475e6cd1fcb8d
 85701	94408	8065816656669111	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/misc/lv_area.c.obj	46da09f56c9ea85e
-1472	32730	8066514807983552	build_example_exe	55426697d5d72cb6
+62	33243	8066514807983552	build_example_exe	55426697d5d72cb6
 115640	119367	8065816933411456	src/liblvgl/v9/CMakeFiles/v9.dir/lvgl/src/widgets/keyboard/lv_keyboard.c.obj	b39af7dfeca21c72
 123270	131774	8065817048752205	src/liblvgl/v9/CMakeFiles/v9.dir/port/lv_vendor.c.obj	bc753b4089875e3d
 168224	172663	8065817461252957	src/tal_bluetooth/CMakeFiles/tal_bluetooth.dir/nimble/host/ble_hs_adv.c.obj	5965ce84c833a312
@@ -639,9 +639,11 @@
 787	3824	8065818957373367	boards/T5AI/TUYA_T5AI_BOARD/CMakeFiles/TUYA_T5AI_BOARD.dir/tuya_t5ai_board.c.obj	619161b778f81d1d
 4316	7863	8065818996885862	lib/libtuyaos.a	12baa6ab79f91d42
 1305	1472	8066514807983552	lib/libtuyaapp.a	cac3b882cbaeebe1
-1472	32730	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
+62	33243	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
 148	938	8066514802600791	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/command_router.c.obj	f7553b9c76a37bd7
 163	1232	8066514805554215	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/uart_transport.c.obj	6f590389194211f2
 257	1305	8066514806284135	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/panel_ui.c.obj	a695102303ba9f3c
-62	33243	8066514807983552	build_example_exe	55426697d5d72cb6
-62	33243	8066514807983552	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6
+71	1838	8066996158113223	CMakeFiles/tuyaapp.dir/C_/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/src/state_store.c.obj	afa8094f0286ac57
+1839	2428	8066996164004453	lib/libtuyaapp.a	cac3b882cbaeebe1
+2428	34633	8066996164004453	build_example_exe	55426697d5d72cb6
+2428	34633	8066996164004453	C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/build_example_exe	55426697d5d72cb6

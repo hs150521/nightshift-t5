@@ -43,7 +43,7 @@ flash,ram,text,code,rodata,data,bss,dec,hex,filename
 23449,75,23380,14770,8610,69,6,23455,`5b9f,armino/bk_peripheral/libbk_peripheral.a
 6592,14,6592,5392,1200,0,14,6606,`19ce,armino/bk_dvp/libbk_dvp.a
 10712,66,10712,7834,2878,0,66,10778,`2a1a,armino/bk_uvc/libbk_uvc.a
-12828,17523,12827,11344,1483,1,17522,30350,`768e,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
+12832,17523,12831,11348,1483,1,17522,30354,`7692,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaapp.a
 317258,902,316986,222328,94658,272,630,317888,`4d9c0,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/nightshift-t5/.build/lib/libtuyaos.a
 104834,18723,104824,91400,13424,10,18713,123547,`1e29b,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libbluetooth_host_ble_ap.a
 20,4,20,20,0,0,4,24,`18,C:/Users/hs150/SynologyDrive/Robotics/AdvX2026/TuyaOpen/platform/T5AI/t5_os/ap/components/bk_libs/bk7258_ap/libs/libaudio_osi.a
